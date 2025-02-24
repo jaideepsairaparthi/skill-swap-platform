@@ -44,3 +44,21 @@ export const fetchUserById = async (id) => {
     console.error(`Error fetching user ${id}:`, error);
   }
 };
+
+// Create or update user profile
+export const createOrUpdateUser = async (userData) => {
+  const token = localStorage.getItem('authToken');
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(userData),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating/updating user:', error);
+  }
+};
