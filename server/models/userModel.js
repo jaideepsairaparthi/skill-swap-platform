@@ -1,4 +1,3 @@
-// models/userModel.js
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -16,10 +15,8 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  skills: {
-    type: [String], // Array of skills
-    default: [],
-  },
+  skillsOffered: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
+  skillsWanted: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
   rating: {
     type: Number,
     default: 0,
@@ -33,6 +30,4 @@ const userSchema = new mongoose.Schema({
   ],
 }, { timestamps: true });
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

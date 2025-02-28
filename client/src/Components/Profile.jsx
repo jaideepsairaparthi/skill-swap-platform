@@ -10,10 +10,18 @@ const Profile = () => {
 
   useEffect(() => {
     const getUser = async () => {
-      const user = await fetchUserById(currentUser.uid);
-      setName(user.name);
-      setEmail(user.email);
-      setSkills(user.skills?.join(', '));
+      try {
+        const user = await fetchUserById(currentUser.uid);
+        if (user.error) {
+          console.error('Error fetching user:', user.error);
+          return;
+        }
+        setName(user.name || '');
+        setEmail(user.email || '');
+        setSkills(user.skills?.join(', ') || '');
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
     };
     getUser();
   }, [currentUser]);

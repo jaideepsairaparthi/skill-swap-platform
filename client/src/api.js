@@ -11,54 +11,59 @@ const getFirebaseToken = async () => {
   return null;
 };
 
-// Fetch all users
-export const fetchAllUsers = async () => {
+// Helper function for API requests
+const fetchWithAuth = async (url, options = {}) => {
   const token = await getFirebaseToken();
+  if (!token) {
+    console.error('User not authenticated');
+    return { error: 'Unauthorized' };
+  }
+
   try {
-    const response = await fetch(`${API_BASE_URL}/users`, {
-      method: 'GET',
+    const response = await fetch(url, {
+      ...options,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`, // Attach token
+        Authorization: `Bearer ${token}`,
+        ...options.headers,
       },
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error(`Error ${response.status}:`, errorData);
+      return { error: errorData };
+    }
+
     return await response.json();
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Network error:', error);
+    return { error: 'Network error' };
   }
+};
+
+// Fetch all users
+export const fetchAllUsers = async () => {
+  return await fetchWithAuth(`${API_BASE_URL}/users`); 
 };
 
 // Fetch a single user by ID
 export const fetchUserById = async (id) => {
-  const token = await getFirebaseToken();
-  try {
-    const response = await fetch(`${API_BASE_URL}/user/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching user ${id}:`, error);
-  }
+  return await fetchWithAuth(`${API_BASE_URL}/user/${id}`); 
 };
 
 // Create or update user profile
 export const createOrUpdateUser = async (userData) => {
-  const token = localStorage.getItem('authToken');
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/user`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(userData),
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Error creating/updating user:', error);
-  }
+  return await fetchWithAuth(`${API_BASE_URL}/user`, { 
+    method: 'POST',
+    body: JSON.stringify(userData),
+  });
+};
+
+// Request Skill Swap
+export const requestSkillSwap = async (userId) => {
+  return await fetchWithAuth(`${API_BASE_URL}/skill-swap`, { 
+    method: 'POST',
+    body: JSON.stringify({ userId }),
+  });
 };

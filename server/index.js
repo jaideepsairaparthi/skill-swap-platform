@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
-const authenticate = require('./middlewares/auth'); // Import the middleware
+const matchRoutes = require('./routes/matchRoutes');
+const authenticate = require('./middlewares/auth');
+const errorHandler = require('./middlewares/errorHandler');
 
 dotenv.config();
 
@@ -22,27 +24,33 @@ mongoose
 // CORS
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://skill-swap-platform-gp36u3nvj-jaideepsai.vercel.app',
-  /\.vercel\.app$/ // Optional: Allows subdomains on Vercel
+  'https://skill-swap-platform-gp36u3nvj-jaideepsai.vercel.app'
 ];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    methods: 'GET,POST,PUT,DELETE',
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: 'GET,POST,PUT,DELETE',
+  credentials: true,
+};
 
-// Protect all /api routes
-app.use('/api', authenticate, userRoutes);
+app.use(cors(corsOptions));
 
 // Routes
+app.use('/api', authenticate, userRoutes);
+app.use('/api', authenticate, matchRoutes);
+
+// Default Route
 app.get('/', (req, res) => {
   res.send('Skill Swap Platform Backend');
 });
 
-// MongoDB Test Route
+// MongoDB Test Route (for debugging)
 app.get('/test-mongo', async (req, res) => {
   try {
     const collections = await mongoose.connection.db.listCollections().toArray();
@@ -56,7 +64,7 @@ app.get('/test-mongo', async (req, res) => {
   }
 });
 
-// Protected test route
+// Protected Test Route (for debugging)
 app.get('/protected', authenticate, (req, res) => {
   res.json({ message: 'This is a protected route', user: req.user });
 });
@@ -65,6 +73,9 @@ app.get('/protected', authenticate, (req, res) => {
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
+
+// Error Handler Middleware (must be after all routes)
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
