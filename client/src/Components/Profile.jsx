@@ -9,6 +9,7 @@ const Profile = () => {
   const [skills, setSkills] = useState('');
 
   useEffect(() => {
+    console.log('Current User UID:', currentUser.uid); // Log the UID
     const getUser = async () => {
       try {
         const user = await fetchUserById(currentUser.uid);

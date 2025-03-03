@@ -1,7 +1,7 @@
 import { getAuth } from 'firebase/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-
+console.log('API Base URL:', import.meta.env.VITE_API_URL);
 // Function to get the Firebase Token
 const getFirebaseToken = async () => {
   const auth = getAuth();
