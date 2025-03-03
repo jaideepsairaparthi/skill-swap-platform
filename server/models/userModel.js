@@ -15,8 +15,22 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  skillsOffered: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
-  skillsWanted: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
+  skillsOffered: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
+    default: [],
+    validate: {
+      validator: (skills) => skills.every((skill) => mongoose.Types.ObjectId.isValid(skill)),
+      message: 'Invalid skill ID in skillsOffered',
+    },
+  },
+  skillsWanted: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
+    default: [],
+    validate: {
+      validator: (skills) => skills.every((skill) => mongoose.Types.ObjectId.isValid(skill)),
+      message: 'Invalid skill ID in skillsWanted',
+    },
+  },
   rating: {
     type: Number,
     default: 0,

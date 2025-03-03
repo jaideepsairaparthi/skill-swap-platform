@@ -10,8 +10,8 @@ const authenticate = async (req, res, next) => {
 
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken); // Verify token using Firebase Admin
-    req.user = decodedToken; // Attach decoded user info to the request object
-    console.log('Authentication successful', decodedToken);
+    req.user = { uid: decodedToken.uid }; // Attach only the Firebase UID to the request object
+    console.log('Authentication successful for user:', decodedToken.uid);
     next(); // Move to the next middleware or route handler
   } catch (error) {
     console.error('Error verifying Firebase token:', error);
