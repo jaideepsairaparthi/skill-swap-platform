@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAllUsers, requestSkillSwap } from '../api';
 
-
 const SkillList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const getUsers = async () => {
       try {
         const data = await fetchAllUsers();
-        setUsers(data);
+        console.log('API Response:', data); // Log the response
+        if (Array.isArray(data)) {
+          setUsers(data);
+        } else {
+          setError('Invalid data format received from the server.');
+        }
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error('Error fetching users:', error);
+        setError('Failed to fetch users. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -24,16 +29,24 @@ const SkillList = () => {
   const handleSkillSwap = async (userId, skillId) => {
     try {
       const response = await requestSkillSwap(userId, skillId);
-      console.log("Skill swap request successful:", response);
-      alert("Skill swap request sent successfully!");
+      console.log('Skill swap request successful:', response);
+      alert('Skill swap request sent successfully!');
     } catch (error) {
-      console.error("Error requesting skill swap:", error);
-      alert("Failed to send skill swap request.");
+      console.error('Error requesting skill swap:', error);
+      alert('Failed to send skill swap request.');
     }
   };
 
   if (loading) {
     return <div className="text-center mt-8">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-8 text-red-500">{error}</div>;
+  }
+
+  if (users.length === 0) {
+    return <div className="text-center mt-8">No users found.</div>;
   }
 
   return (
@@ -44,10 +57,11 @@ const SkillList = () => {
           <div key={user._id} className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold">{user.name}</h2>
             <p className="text-gray-600">{user.email}</p>
-            <p className="mt-2">Skills: {user.skills?.join(', ')}</p>
+            <p className="mt-2">Skills Offered: {user.skillsOffered?.join(', ')}</p>
+            <p className="mt-2">Skills Wanted: {user.skillsWanted?.join(', ')}</p>
             <button
               className="mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-              onClick={() => handleSkillSwap(user._id)}
+              onClick={() => handleSkillSwap(user._id, user.skillsOffered[0])} // Pass a skill ID
             >
               Request Skill Swap
             </button>

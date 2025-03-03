@@ -6,7 +6,8 @@ const Profile = () => {
   const { currentUser } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [skills, setSkills] = useState('');
+  const [skillsOffered, setSkillsOffered] = useState('');
+  const [skillsWanted, setSkillsWanted] = useState('');
 
   useEffect(() => {
     console.log('Current User UID:', currentUser.uid); // Log the UID
@@ -19,7 +20,8 @@ const Profile = () => {
         }
         setName(user.name || '');
         setEmail(user.email || '');
-        setSkills(user.skills?.join(', ') || '');
+        setSkillsOffered(user.skillsOffered?.join(', ') || ''); // Populate skillsOffered
+        setSkillsWanted(user.skillsWanted?.join(', ') || ''); // Populate skillsWanted
       } catch (error) {
         console.error('Error fetching user:', error);
       }
@@ -29,14 +31,29 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const userData = { name, email, skills: skills.split(',') };
-    await createOrUpdateUser(userData);
+
+    // Prepare the user data
+    const userData = {
+      firebaseUID: currentUser.uid, // Include the Firebase UID
+      name,
+      email,
+      skillsOffered: skillsOffered.split(',').map(skill => skill.trim()), // Convert to array
+      skillsWanted: skillsWanted.split(',').map(skill => skill.trim()), // Convert to array
+    };
+
+    try {
+      const response = await createOrUpdateUser(userData);
+      console.log('Profile updated successfully:', response);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-2xl font-bold mb-6">Profile</h1>
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+        {/* Name Field */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Name</label>
           <input
@@ -47,6 +64,8 @@ const Profile = () => {
             required
           />
         </div>
+
+        {/* Email Field */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Email</label>
           <input
@@ -57,16 +76,32 @@ const Profile = () => {
             required
           />
         </div>
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Skills (comma-separated)</label>
+
+        {/* Skills Offered Field */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Skills Offered (comma-separated)</label>
           <input
             type="text"
-            value={skills}
-            onChange={(e) => setSkills(e.target.value)}
+            value={skillsOffered}
+            onChange={(e) => setSkillsOffered(e.target.value)}
             className="w-full p-2 border rounded"
-            required
+            placeholder="e.g., JavaScript, React"
           />
         </div>
+
+        {/* Skills Wanted Field */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-2">Skills Wanted (comma-separated)</label>
+          <input
+            type="text"
+            value={skillsWanted}
+            onChange={(e) => setSkillsWanted(e.target.value)}
+            className="w-full p-2 border rounded"
+            placeholder="e.g., Node.js, MongoDB"
+          />
+        </div>
+
+        {/* Submit Button */}
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
           Update Profile
         </button>
