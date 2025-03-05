@@ -6,7 +6,8 @@ import Dashboard from './Components/Dashboard';
 import SkillList from './Components/SkillList';
 import Profile from './Components/Profile';
 import Navbar from './Components/Navbar';
-import { requestNotificationPermission } from './components/NotificationService';
+import {requestNotificationPermission} from "./Components/NotificationService";
+
 
 function App() {
   useEffect(() => {
