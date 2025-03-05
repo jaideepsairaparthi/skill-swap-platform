@@ -1,9 +1,10 @@
 const express = require('express');
 const { body, param } = require('express-validator');
-const { createOrUpdateUser, getUserById, getAllUsers } = require('../controllers/userController');
+const { createOrUpdateUser, getUserById, getAllUsers,updateDeviceToken, } = require('../controllers/userController');
 const authenticate = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
 const { requestSkillSwap } = require('../controllers/skillSwapController');
+
 
 const router = express.Router();
 
