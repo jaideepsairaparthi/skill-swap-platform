@@ -1,10 +1,15 @@
+// routes/userRoutes.js
 const express = require('express');
 const { body, param } = require('express-validator');
-const { createOrUpdateUser, getUserById, getAllUsers,updateDeviceToken, } = require('../controllers/userController');
+const {
+  createOrUpdateUser,
+  getUserById,
+  getAllUsers,
+  updateDeviceToken, // Import the new function
+} = require('../controllers/userController');
 const authenticate = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
 const { requestSkillSwap } = require('../controllers/skillSwapController');
-
 
 const router = express.Router();
 
@@ -51,6 +56,5 @@ router.post(
   validate([body('token').notEmpty().withMessage('Token is required')]),
   updateDeviceToken
 );
-
 
 module.exports = router;

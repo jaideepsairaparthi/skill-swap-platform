@@ -53,17 +53,22 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// Update Device Token
+// controllers/userController.js
 const updateDeviceToken = async (req, res) => {
   const { token } = req.body;
-  const userId = req.user.uid;
+  const userId = req.user.uid; // Firebase UID of the authenticated user
 
   try {
+    console.log('Updating device token for user:', userId); // Debug
+    console.log('Received FCM token:', token); // Debug
+
     const user = await User.findOneAndUpdate(
       { firebaseUID: userId },
       { $addToSet: { deviceTokens: token } }, // Add token if it doesn't exist
       { new: true }
     );
+
+    console.log('Updated user:', user); // Debug
     res.status(200).json({ message: 'Device token updated successfully', user });
   } catch (error) {
     console.error('Error updating device token:', error);
@@ -71,9 +76,10 @@ const updateDeviceToken = async (req, res) => {
   }
 };
 
+
 module.exports = {
   createOrUpdateUser,
   getUserById,
   getAllUsers,
-  updateDeviceToken,
+  updateDeviceToken, // Export the new function
 };
