@@ -1,3 +1,4 @@
+// controllers/userController.js
 const User = require('../models/userModel');
 
 // Create or Update User
@@ -7,7 +8,7 @@ const createOrUpdateUser = async (req, res) => {
   try {
     let user = await User.findOneAndUpdate(
       { firebaseUID },
-      { name, email, skillsOffered, skillsWanted }, // Include skillsOffered and skillsWanted
+      { name, email, skillsOffered, skillsWanted },
       { new: true, upsert: true }
     );
     res.status(200).json(user);
@@ -52,9 +53,27 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// Export all functions
+// Update Device Token
+const updateDeviceToken = async (req, res) => {
+  const { token } = req.body;
+  const userId = req.user.uid;
+
+  try {
+    const user = await User.findOneAndUpdate(
+      { firebaseUID: userId },
+      { $addToSet: { deviceTokens: token } }, // Add token if it doesn't exist
+      { new: true }
+    );
+    res.status(200).json({ message: 'Device token updated successfully', user });
+  } catch (error) {
+    console.error('Error updating device token:', error);
+    res.status(500).json({ message: 'Error updating device token', error: error.message });
+  }
+};
+
 module.exports = {
   createOrUpdateUser,
   getUserById,
   getAllUsers,
+  updateDeviceToken,
 };

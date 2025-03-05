@@ -43,4 +43,13 @@ router.post(
   requestSkillSwap
 );
 
+// Update Device Token
+router.post(
+  '/user/update-device-token',
+  authenticate,
+  validate([body('token').notEmpty().withMessage('Token is required')]),
+  updateDeviceToken
+);
+
+
 module.exports = router;

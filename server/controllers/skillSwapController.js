@@ -1,6 +1,9 @@
-const User = require('../models/userModel');
+// controllers/skillSwapController.js
 const Match = require('../models/Match');
+const User = require('../models/userModel');
+const sendNotification = require('../utils/notificationHelper');
 
+// Request Skill Swap
 const requestSkillSwap = async (req, res) => {
   const { targetUserId, skillId } = req.body;
   const requesterUserId = req.user.uid; // Firebase UID of the requester
@@ -43,6 +46,15 @@ const requestSkillSwap = async (req, res) => {
     });
 
     await match.save();
+
+    // Send notification to the target user
+    const requester = await User.findOne({ firebaseUID: requesterUserId });
+    await sendNotification(
+      targetUser._id, // Target user's MongoDB ID
+      'New Skill Swap Request',
+      `${requester.name} wants to swap skills with you!`
+    );
+
     res.status(200).json({ message: 'Skill swap request sent successfully', match });
   } catch (error) {
     console.error('Error requesting skill swap:', error);
@@ -50,4 +62,44 @@ const requestSkillSwap = async (req, res) => {
   }
 };
 
-module.exports = { requestSkillSwap };
+// Update Skill Swap Status
+const updateSkillSwapStatus = async (req, res) => {
+  const { status } = req.body;
+  const matchId = req.params.id;
+  const userId = req.user.uid; // Firebase UID of the authenticated user
+
+  try {
+    // Find the match
+    const match = await Match.findById(matchId);
+    if (!match) {
+      return res.status(404).json({ message: 'Match not found' });
+    }
+
+    // Check if the authenticated user is involved in the match
+    if (match.userA !== userId && match.userB !== userId) {
+      return res.status(403).json({ message: 'You are not authorized to update this match' });
+    }
+
+    // Update the match status
+    const updatedMatch = await Match.findByIdAndUpdate(
+      matchId,
+      { status },
+      { new: true }
+    );
+
+    // Send notification to the requester
+    const targetUser = await User.findOne({ firebaseUID: match.userA === userId ? match.userB : match.userA });
+    await sendNotification(
+      match.userA === userId ? match.userB : match.userA, // Notify the other user
+      'Skill Swap Request Updated',
+      `${targetUser.name} has ${status} your request.`
+    );
+
+    res.status(200).json({ message: 'Match status updated successfully', match: updatedMatch });
+  } catch (error) {
+    console.error('Error updating match status:', error);
+    res.status(500).json({ message: 'Error updating match status', error: error.message });
+  }
+};
+
+module.exports = { requestSkillSwap, updateSkillSwapStatus };
