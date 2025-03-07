@@ -29,6 +29,15 @@ const sendNotification = async (userId, title, body) => {
     // Send the notification
     const response = await admin.messaging().sendMulticast(message);
     console.log('Notification sent successfully:', response);
+
+    // Check for failures in the response
+    if (response.failureCount > 0) {
+      response.responses.forEach((resp, index) => {
+        if (!resp.success) {
+          console.error(`Failed to send notification to token ${user.deviceTokens[index]}:`, resp.error);
+        }
+      });
+    }
   } catch (error) {
     console.error('Error sending notification:', error);
   }

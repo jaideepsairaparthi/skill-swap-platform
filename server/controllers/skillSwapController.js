@@ -49,6 +49,10 @@ const requestSkillSwap = async (req, res) => {
 
     // Send notification to the target user
     const requester = await User.findOne({ firebaseUID: requesterUserId });
+    if (!requester) {
+      return res.status(404).json({ message: 'Requester user not found' });
+    }
+
     await sendNotification(
       targetUser._id, // Target user's MongoDB ID
       'New Skill Swap Request',
@@ -89,6 +93,10 @@ const updateSkillSwapStatus = async (req, res) => {
 
     // Send notification to the requester
     const targetUser = await User.findOne({ firebaseUID: match.userA === userId ? match.userB : match.userA });
+    if (!targetUser) {
+      return res.status(404).json({ message: 'Target user not found' });
+    }
+
     await sendNotification(
       match.userA === userId ? match.userB : match.userA, // Notify the other user
       'Skill Swap Request Updated',

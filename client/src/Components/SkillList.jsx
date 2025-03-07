@@ -26,16 +26,16 @@ const SkillList = () => {
     getUsers();
   }, []);
 
-  const handleSkillSwap = async (userId, skillId) => {
-    try {
-      const response = await requestSkillSwap(userId, skillId);
-      console.log('Skill swap request successful:', response);
-      alert('Skill swap request sent successfully!');
-    } catch (error) {
-      console.error('Error requesting skill swap:', error);
-      alert('Failed to send skill swap request.');
-    }
-  };
+// SkillList.jsx
+const handleSkillSwap = async (targetUserId, skillId) => {
+  try {
+    console.log('Requesting skill swap with target user:', targetUserId); // Debug
+    const response = await requestSkillSwap(targetUserId, skillId);
+    console.log('Skill swap request successful:', response);
+  } catch (error) {
+    console.error('Error requesting skill swap:', error);
+  }
+};
 
   if (loading) {
     return <div className="text-center mt-8">Loading...</div>;
