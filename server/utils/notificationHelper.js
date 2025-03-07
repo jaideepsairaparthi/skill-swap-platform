@@ -1,10 +1,10 @@
 // utils/notificationHelper.js
-const admin = require('firebase-admin');
-const User = require('../models/userModel'); // Import your User model
+const admin = require("firebase-admin");
+const User = require("../models/userModel"); // Import your User model
 
 // Initialize Firebase Admin (if not already initialized)
 if (!admin.apps.length) {
-  const serviceAccount = require('./path/to/serviceAccountKey.json'); // Path to your Firebase service account key
+  const serviceAccount = require("./path/to/serviceAccountKey.json"); // Path to your Firebase service account key
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
@@ -16,7 +16,7 @@ const sendNotification = async (userId, title, body) => {
     // Find the user by ID
     const user = await User.findById(userId);
     if (!user || user.deviceTokens.length === 0) {
-      console.log('User not found or no device tokens available');
+      console.log("User not found or no device tokens available");
       return;
     }
 
@@ -28,18 +28,21 @@ const sendNotification = async (userId, title, body) => {
 
     // Send the notification
     const response = await admin.messaging().sendMulticast(message);
-    console.log('Notification sent successfully:', response);
+    console.log("Notification sent successfully:", response);
 
     // Check for failures in the response
     if (response.failureCount > 0) {
       response.responses.forEach((resp, index) => {
         if (!resp.success) {
-          console.error(`Failed to send notification to token ${user.deviceTokens[index]}:`, resp.error);
+          console.error(
+            `Failed to send notification to token ${user.deviceTokens[index]}:`,
+            resp.error
+          );
         }
       });
     }
   } catch (error) {
-    console.error('Error sending notification:', error);
+    console.error("Error sending notification:", error);
   }
 };
 

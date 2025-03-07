@@ -19,18 +19,28 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
   };
 
+  const guestLogin = () => {
+    const guestUser = {
+      uid: 'guest',
+      email: 'guest@skillswap.com',
+      displayName: 'Guest User',
+    };
+    setCurrentUser(guestUser);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
     });
     return unsubscribe;
-  }, []);
+  }, [auth]);
 
   const value = {
     currentUser,
     login,
     logout,
+    guestLogin, // Add guestLogin to the context
   };
 
   return (
