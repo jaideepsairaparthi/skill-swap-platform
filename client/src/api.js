@@ -50,23 +50,22 @@ const fetchWithAuth = async (url, options = {}) => {
 };
 
 // Fetch all users
-
 export const fetchAllUsers = async () => {
   try {
-    const response = await fetchWithAuth(`${API_BASE_URL}/users`);
-    if (response.error) {
-      console.error('Error fetching users:', response.error);
+    const { data, error } = await fetchWithAuth(`${API_BASE_URL}/users`);
+    if (error) {
+      console.error('Error fetching users:', error);
       return []; // Return an empty array in case of error
     }
 
     // Log the response for debugging
-    console.log('API Response:', response);
+    console.log('API Response:', data);
 
     // Ensure the response contains an array of users
-    if (Array.isArray(response.data)) {
-      return response.data; // Return the users array
+    if (Array.isArray(data?.users)) {
+      return data.users; // Return the users array
     } else {
-      console.error('Invalid data format received from the server:', response.data);
+      console.error('Invalid data format received from the server:', data);
       return []; // Return an empty array if the data format is invalid
     }
   } catch (error) {
@@ -144,20 +143,36 @@ export const updateDeviceToken = async (token) => {
   return data; // Return the updated user object
 };
 
-// Update Match Status
-export const updateMatchStatus = async (matchId, status) => {
-  if (!matchId || !status) {
-    console.error('Match ID and status are required');
-    return null;
-  }
 
-  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/match/${matchId}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ status }),
+export const addReview = async (reviewData) => {
+  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/reviews`, {
+    method: 'POST',
+    body: JSON.stringify(reviewData),
   });
   if (error) {
-    console.error('Error updating match status:', error);
-    return null; // Return null in case of error
+    console.error('Error adding review:', error);
+    return null;
   }
-  return data; // Return the updated match object
+  return data;
 };
+
+export const fetchMatches = async (userId) => {
+  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/matches/${userId}`);
+  if (error) {
+    console.error('Error fetching matches:', error);
+    return [];
+  }
+  return data;
+};
+
+    export const updateMatchStatus = async (matchId, status) => {
+      const { data, error } = await fetchWithAuth(`${API_BASE_URL}/matches/${matchId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+      if (error) {
+        console.error('Error updating match status:', error);
+        return null;
+      }
+      return data;
+    };

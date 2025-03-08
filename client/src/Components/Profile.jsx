@@ -8,6 +8,7 @@ const Profile = () => {
   const { currentUser } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [profilePic, setProfilePic] = useState('');
   const [skillsOffered, setSkillsOffered] = useState('');
   const [skillsWanted, setSkillsWanted] = useState('');
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,7 @@ const Profile = () => {
         }
         setName(user.name || '');
         setEmail(user.email || '');
+        setProfilePic(user.profilePic || 'https://via.placeholder.com/150'); // Default placeholder image
         setSkillsOffered(user.skillsOffered?.join(', ') || ''); // Populate skillsOffered
         setSkillsWanted(user.skillsWanted?.join(', ') || ''); // Populate skillsWanted
       } catch (error) {
@@ -41,6 +43,7 @@ const Profile = () => {
       firebaseUID: currentUser.uid, // Include the Firebase UID
       name,
       email,
+      profilePic, // Include profile picture
       skillsOffered: skillsOffered.split(',').map(skill => skill.trim()), // Convert to array
       skillsWanted: skillsWanted.split(',').map(skill => skill.trim()), // Convert to array
     };
@@ -94,6 +97,20 @@ const Profile = () => {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               placeholder="Enter your email"
               required
+            />
+          </div>
+
+          {/* Profile Picture Field */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Profile Picture URL
+            </label>
+            <input
+              type="text"
+              value={profilePic}
+              onChange={(e) => setProfilePic(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="Enter profile picture URL"
             />
           </div>
 

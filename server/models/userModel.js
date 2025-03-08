@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    profilePic: {
+      type: String, // URL of the profile picture
+      default: "https://via.placeholder.com/150", // Default placeholder image
+    },
     skillsOffered: {
       type: [String], // Store skill names directly
       default: [],

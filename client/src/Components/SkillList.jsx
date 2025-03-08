@@ -109,7 +109,7 @@ const SkillList = () => {
           >
             <div className="flex items-center space-x-4 mb-4">
               <img
-                src="/default-avatar.png" // Use a local image
+                src={user.profilePic || "https://via.placeholder.com/150"} // Use profilePic or default
                 alt={user.name}
                 className="w-12 h-12 rounded-full"
               />
