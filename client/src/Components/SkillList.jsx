@@ -13,12 +13,11 @@ const SkillList = () => {
   useEffect(() => {
     const getUsers = async () => {
       try {
-        const { data, error } = await fetchAllUsers(); // Destructure the response
-        if (error) {
-          setError(error);
-        } else if (Array.isArray(data)) {
-          setUsers(data);
-          setFilteredUsers(data);
+        const users = await fetchAllUsers();
+        console.log('Users:', users); // Log the users for debugging
+        if (Array.isArray(users)) {
+          setUsers(users);
+          setFilteredUsers(users);
         } else {
           setError('Invalid data format received from the server.');
         }
@@ -44,21 +43,11 @@ const SkillList = () => {
   }, [searchQuery, users]);
 
   const handleSkillSwap = async (targetUserId, skillName) => {
-    if (!targetUserId || !skillName) {
-      alert('Invalid target user or skill name.');
-      return;
-    }
-
     try {
       console.log('Requesting skill swap with target user:', targetUserId); // Debug
-      const { data, error } = await requestSkillSwap(targetUserId, skillName); // Destructure the response
-      if (error) {
-        console.error('Error requesting skill swap:', error);
-        alert('Failed to send skill swap request. Please try again.');
-      } else {
-        console.log('Skill swap request successful:', data);
-        alert('Skill swap request sent successfully!');
-      }
+      const response = await requestSkillSwap(targetUserId, skillName); // Pass skillName
+      console.log('Skill swap request successful:', response);
+      alert('Skill swap request sent successfully!');
     } catch (error) {
       console.error('Error requesting skill swap:', error);
       alert('Failed to send skill swap request. Please try again.');
@@ -120,7 +109,7 @@ const SkillList = () => {
           >
             <div className="flex items-center space-x-4 mb-4">
               <img
-                src="https://via.placeholder.com/50"
+                src="/default-avatar.png" // Use a local image
                 alt={user.name}
                 className="w-12 h-12 rounded-full"
               />
@@ -156,7 +145,6 @@ const SkillList = () => {
             <button
               className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
               onClick={() => handleSkillSwap(user.firebaseUID, user.skillsOffered[0])} // Pass skillName
-              disabled={!user.skillsOffered || user.skillsOffered.length === 0} // Disable if no skills offered
             >
               Request Skill Swap
             </button>

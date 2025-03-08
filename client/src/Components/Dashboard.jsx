@@ -34,7 +34,7 @@ const Dashboard = () => {
           <h2 className="text-xl font-bold text-gray-900 mb-4">Your Profile</h2>
           <div className="flex items-center space-x-4">
             <img
-              src="https://via.placeholder.com/100"
+              src="src\assets\Gemini_Generated_Image_q39v7pq39v7pq39v.jpeg"
               alt="Profile"
               className="w-16 h-16 rounded-full"
             />

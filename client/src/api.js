@@ -50,13 +50,29 @@ const fetchWithAuth = async (url, options = {}) => {
 };
 
 // Fetch all users
+
 export const fetchAllUsers = async () => {
-  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/users`);
-  if (error) {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/users`);
+    if (response.error) {
+      console.error('Error fetching users:', response.error);
+      return []; // Return an empty array in case of error
+    }
+
+    // Log the response for debugging
+    console.log('API Response:', response);
+
+    // Ensure the response contains an array of users
+    if (Array.isArray(response.data)) {
+      return response.data; // Return the users array
+    } else {
+      console.error('Invalid data format received from the server:', response.data);
+      return []; // Return an empty array if the data format is invalid
+    }
+  } catch (error) {
     console.error('Error fetching users:', error);
     return []; // Return an empty array in case of error
   }
-  return data?.users || []; // Return the users array
 };
 
 // Fetch a single user by Firebase UID
