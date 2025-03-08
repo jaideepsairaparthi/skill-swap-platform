@@ -18,8 +18,7 @@ const matchSchema = new mongoose.Schema({
     },
   },
   skillExchanged: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Skill',
+    type: String, // Store skill name directly
     required: true,
   },
   status: {

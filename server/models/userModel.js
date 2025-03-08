@@ -17,20 +17,12 @@ const userSchema = new mongoose.Schema(
       unique: true,
     },
     skillsOffered: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
+      type: [String], // Store skill names directly
       default: [],
-      validate: {
-        validator: (skills) => skills.every((skill) => mongoose.Types.ObjectId.isValid(skill)),
-        message: 'Invalid skill ID in skillsOffered',
-      },
     },
     skillsWanted: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
+      type: [String], // Store skill names directly
       default: [],
-      validate: {
-        validator: (skills) => skills.every((skill) => mongoose.Types.ObjectId.isValid(skill)),
-        message: 'Invalid skill ID in skillsWanted',
-      },
     },
     rating: {
       type: Number,

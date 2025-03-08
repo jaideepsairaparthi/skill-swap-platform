@@ -1,11 +1,10 @@
-// controllers/skillSwapController.js
 const Match = require('../models/Match');
 const User = require('../models/userModel');
 const sendNotification = require('../utils/notificationHelper');
 
 // Request Skill Swap
 const requestSkillSwap = async (req, res) => {
-  const { targetUserId, skillId } = req.body;
+  const { targetUserId, skillName } = req.body; // Use skillName instead of skillId
   const requesterUserId = req.user.uid; // Firebase UID of the requester
 
   try {
@@ -21,7 +20,7 @@ const requestSkillSwap = async (req, res) => {
     }
 
     // Check if the skill exists in the target user's offered skills
-    if (!targetUser.skillsOffered.includes(skillId)) {
+    if (!targetUser.skillsOffered.includes(skillName)) {
       return res.status(400).json({ message: 'Target user does not offer this skill' });
     }
 
@@ -29,7 +28,7 @@ const requestSkillSwap = async (req, res) => {
     const existingMatch = await Match.findOne({
       userA: requesterUserId,
       userB: targetUserId,
-      skillExchanged: skillId,
+      skillExchanged: skillName,
       status: 'pending',
     });
 
@@ -41,7 +40,7 @@ const requestSkillSwap = async (req, res) => {
     const match = new Match({
       userA: requesterUserId, // Firebase UID of the requester
       userB: targetUserId,   // Firebase UID of the target user
-      skillExchanged: skillId,
+      skillExchanged: skillName, // Store skill name
       status: 'pending',
     });
 

@@ -21,6 +21,7 @@ const fetchWithAuth = async (url, options = {}) => {
   }
 
   try {
+    console.log('Making request to:', url, 'with options:', options); // Debugging
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -33,10 +34,15 @@ const fetchWithAuth = async (url, options = {}) => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error(`Error ${response.status}:`, errorData);
-      return { error: errorData };
+      return { error: errorData.message || `HTTP Error: ${response.status}` };
     }
 
-    return await response.json();
+    // Handle empty responses (e.g., 204 No Content)
+    if (response.status === 204) {
+      return { data: null };
+    }
+
+    return { data: await response.json() };
   } catch (error) {
     console.error('Network error:', error);
     return { error: 'Network error' };
@@ -45,46 +51,97 @@ const fetchWithAuth = async (url, options = {}) => {
 
 // Fetch all users
 export const fetchAllUsers = async () => {
-  const response = await fetchWithAuth(`${API_BASE_URL}/users`);
-  if (response.error) {
-    console.error('Error fetching users:', response.error);
+  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/users`);
+  if (error) {
+    console.error('Error fetching users:', error);
     return []; // Return an empty array in case of error
   }
-  return response.users || []; // Return the users array
+  return data?.users || []; // Return the users array
 };
 
-// Fetch a single user by ID
-export const fetchUserById = async (id) => {
-  const response = await fetchWithAuth(`${API_BASE_URL}/user/${id}`);
-  if (response.error) {
-    console.error('Error fetching user:', response.error);
+// Fetch a single user by Firebase UID
+export const fetchUserById = async (firebaseUID) => {
+  if (!firebaseUID) {
+    console.error('Firebase UID is required');
+    return null;
+  }
+
+  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/user/${firebaseUID}`);
+  if (error) {
+    console.error('Error fetching user:', error);
     return null; // Return null in case of error
   }
-  return response; // Return the user object
+  return data; // Return the user object
 };
 
 // Create or update user profile
 export const createOrUpdateUser = async (userData) => {
-  const response = await fetchWithAuth(`${API_BASE_URL}/user`, {
+  if (!userData || !userData.firebaseUID) {
+    console.error('Invalid user data');
+    return null;
+  }
+
+  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/user`, {
     method: 'POST',
     body: JSON.stringify(userData),
   });
-  if (response.error) {
-    console.error('Error creating/updating user:', response.error);
+  if (error) {
+    console.error('Error creating/updating user:', error);
     return null; // Return null in case of error
   }
-  return response; // Return the updated user object
+  return data; // Return the updated user object
 };
 
 // Request Skill Swap
-export const requestSkillSwap = async (targetUserId, skillId) => {
-  const response = await fetchWithAuth(`${API_BASE_URL}/skill-swap/request`, {
+export const requestSkillSwap = async (targetUserId, skillName) => {
+  if (!targetUserId || !skillName) {
+    console.error('Target user ID and skill name are required');
+    return null;
+  }
+
+  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/skill-swap/request`, {
     method: 'POST',
-    body: JSON.stringify({ targetUserId, skillId }),
+    body: JSON.stringify({ targetUserId, skillName }), // Use skillName instead of skillId
   });
-  if (response.error) {
-    console.error('Error requesting skill swap:', response.error);
+  if (error) {
+    console.error('Error requesting skill swap:', error);
     return null; // Return null in case of error
   }
-  return response; // Return the match object
+  return data; // Return the match object
+};
+
+// Update Device Token
+export const updateDeviceToken = async (token) => {
+  if (!token) {
+    console.error('Device token is required');
+    return null;
+  }
+
+  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/user/update-device-token`, {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+  if (error) {
+    console.error('Error updating device token:', error);
+    return null; // Return null in case of error
+  }
+  return data; // Return the updated user object
+};
+
+// Update Match Status
+export const updateMatchStatus = async (matchId, status) => {
+  if (!matchId || !status) {
+    console.error('Match ID and status are required');
+    return null;
+  }
+
+  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/match/${matchId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+  if (error) {
+    console.error('Error updating match status:', error);
+    return null; // Return null in case of error
+  }
+  return data; // Return the updated match object
 };
