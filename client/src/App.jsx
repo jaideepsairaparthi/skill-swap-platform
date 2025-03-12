@@ -8,6 +8,8 @@ import SkillList from './Components/SkillList';
 import Profile from './Components/Profile';
 import Navbar from './Components/Navbar';
 import LandingPage from './Components/LandingPage';
+import Matches from './Components/Matches'; // Import the Matches component
+import Reviews from './Components/Reviews'; // Import the Reviews component
 import { requestNotificationPermission } from './Components/NotificationService';
 
 function App() {
@@ -40,6 +42,14 @@ function App() {
         <Route
           path="/profile"
           element={currentUser ? <Profile /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/matches"
+          element={currentUser ? <Matches /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/reviews/:userId"
+          element={currentUser ? <Reviews /> : <Navigate to="/login" />}
         />
 
         {/* Fallback Route: Redirect to Landing Page */}

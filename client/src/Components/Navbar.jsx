@@ -36,6 +36,18 @@ const Navbar = () => {
                   Skills
                 </Link>
                 <Link
+                  to="/matches"
+                  className="text-white hover:text-gray-200 hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                >
+                  Matches
+                </Link>
+                <Link
+                  to={`/reviews/${currentUser.uid}`}
+                  className="text-white hover:text-gray-200 hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                >
+                  Reviews
+                </Link>
+                <Link
                   to="/profile"
                   className="text-white hover:text-gray-200 hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
                 >
@@ -116,6 +128,18 @@ const Navbar = () => {
                     className="block text-white hover:text-gray-200 hover:bg-blue-700 px-3 py-2 rounded-md text-base font-medium transition duration-300"
                   >
                     Skills
+                  </Link>
+                  <Link
+                    to="/matches"
+                    className="block text-white hover:text-gray-200 hover:bg-blue-700 px-3 py-2 rounded-md text-base font-medium transition duration-300"
+                  >
+                    Matches
+                  </Link>
+                  <Link
+                    to={`/reviews/${currentUser.uid}`}
+                    className="block text-white hover:text-gray-200 hover:bg-blue-700 px-3 py-2 rounded-md text-base font-medium transition duration-300"
+                  >
+                    Reviews
                   </Link>
                   <Link
                     to="/profile"

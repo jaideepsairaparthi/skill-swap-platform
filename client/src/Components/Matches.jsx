@@ -13,6 +13,7 @@ const Matches = () => {
     const fetchUserMatches = async () => {
       try {
         const matches = await fetchMatches(currentUser.uid);
+        console.log('Matches:', matches); // Debugging
         if (matches.error) {
           console.error('Error fetching matches:', matches.error);
           return;
@@ -55,43 +56,52 @@ const Matches = () => {
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Matches</h2>
 
       {/* Matches List */}
-      <div className="space-y-6">
-        {matches.map((match) => (
-          <div key={match._id} className="border-b border-gray-200 pb-4">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{match.userA === currentUser.uid ? match.userBName : match.userAName}</h3>
-                <p className="text-sm text-gray-600">Skill Exchanged: {match.skillExchanged}</p>
+      {matches.length === 0 ? (
+        <div className="text-center text-gray-600">
+          <p>No matches found.</p>
+          <p>Start swapping skills to see matches here!</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {matches.map((match) => (
+            <div key={match._id} className="border-b border-gray-200 pb-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {match.userA === currentUser.uid ? match.userBName : match.userAName}
+                  </h3>
+                  <p className="text-sm text-gray-600">Skill Exchanged: {match.skillExchanged}</p>
+                </div>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                    match.status === 'pending'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : match.status === 'accepted'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}
+                >
+                  {match.status}
+                </span>
               </div>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                  match.status === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : match.status === 'accepted'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-blue-100 text-blue-800'
-                }`}
-              >
-                {match.status}
-              </span>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => handleUpdateStatus(match._id, 'accepted')}
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => handleUpdateStatus(match._id, 'completed')}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+                >
+                  Complete
+                </button>
+              </div>
             </div>
-            <div className="flex space-x-4">
-              <button
-                onClick={() => handleUpdateStatus(match._id, 'accepted')}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all"
-              >
-                Accept
-              </button>
-              <button
-                onClick={() => handleUpdateStatus(match._id, 'completed')}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-              >
-                Complete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Toast Container */}
       <ToastContainer

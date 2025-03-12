@@ -4,6 +4,9 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const matchRoutes = require('./routes/matchRoutes');
+const reviewRoutes = require('./routes/reviewRoutes'); // Add review routes
+const skillRoutes = require('./routes/skillRoutes'); // Add skill routes
+const notificationRoutes = require('./routes/notificationRoutes'); // Add notification routes
 const authenticate = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
 
@@ -44,6 +47,9 @@ app.use(cors(corsOptions));
 // Routes
 app.use('/api', authenticate, userRoutes);
 app.use('/api', authenticate, matchRoutes);
+app.use('/api', authenticate, reviewRoutes); // Add review routes
+app.use('/api', authenticate, skillRoutes); // Add skill routes
+app.use('/api', authenticate, notificationRoutes); // Add notification routes
 
 // Default Route
 app.get('/', (req, res) => {

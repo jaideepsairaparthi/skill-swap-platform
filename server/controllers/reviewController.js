@@ -1,4 +1,3 @@
-// controllers/reviewController.js
 const User = require('../models/userModel');
 const Review = require('../models/Review');
 const sendNotification = require('../utils/notificationHelper');
@@ -9,10 +8,16 @@ const addReview = async (req, res) => {
   const reviewerId = req.user.uid; // Firebase UID of the reviewer
 
   try {
-    // Check if the user exists
+    // Check if the user being reviewed exists
     const user = await User.findOne({ firebaseUID: userId });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if the reviewer exists
+    const reviewer = await User.findOne({ firebaseUID: reviewerId });
+    if (!reviewer) {
+      return res.status(404).json({ message: 'Reviewer not found' });
     }
 
     // Check if the reviewer is trying to review themselves
@@ -22,8 +27,8 @@ const addReview = async (req, res) => {
 
     // Create a new review
     const review = new Review({
-      reviewer: reviewerId,
-      reviewee: userId,
+      reviewer: reviewerId, // Firebase UID
+      reviewee: userId, // Firebase UID
       rating,
       comment,
     });
@@ -38,9 +43,8 @@ const addReview = async (req, res) => {
     );
 
     // Send notification to the reviewed user
-    const reviewer = await User.findOne({ firebaseUID: reviewerId });
     await sendNotification(
-      user._id, // Reviewed user's MongoDB ID
+      user._id, // MongoDB ID of the reviewed user
       'New Review',
       `${reviewer.name} left a review for you.`
     );

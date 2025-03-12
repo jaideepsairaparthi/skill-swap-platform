@@ -1,14 +1,13 @@
-// controllers/userController.js
 const User = require('../models/userModel');
 
 // Create or Update User
 const createOrUpdateUser = async (req, res) => {
-  const { firebaseUID, name, email, skillsOffered, skillsWanted } = req.body;
+  const { firebaseUID, name, email, skillsOffered, skillsWanted, location } = req.body;
 
   try {
     let user = await User.findOneAndUpdate(
       { firebaseUID },
-      { name, email, skillsOffered, skillsWanted },
+      { name, email, skillsOffered, skillsWanted, location },
       { new: true, upsert: true }
     );
     res.status(200).json(user);
@@ -30,17 +29,27 @@ const getUserById = async (req, res) => {
   }
 };
 
-// Get All Users (with pagination)
+// Get All Users (with pagination, sorting, and filtering)
 const getAllUsers = async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, sortBy = 'name', order = 'asc', search = '' } = req.query;
 
   try {
-    const users = await User.find()
+    const query = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { skillsOffered: { $regex: search, $options: 'i' } },
+        { skillsWanted: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const users = await User.find(query)
+      .sort({ [sortBy]: order === 'asc' ? 1 : -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .exec();
 
-    const count = await User.countDocuments();
+    const count = await User.countDocuments(query);
 
     res.status(200).json({
       users,
@@ -53,22 +62,17 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// controllers/userController.js
+// Update Device Token
 const updateDeviceToken = async (req, res) => {
   const { token } = req.body;
-  const userId = req.user.uid; // Firebase UID of the authenticated user
+  const userId = req.user.uid;
 
   try {
-    console.log('Updating device token for user:', userId); // Debug
-    console.log('Received FCM token:', token); // Debug
-
     const user = await User.findOneAndUpdate(
       { firebaseUID: userId },
-      { $addToSet: { deviceTokens: token } }, // Add token if it doesn't exist
+      { $addToSet: { deviceTokens: token } },
       { new: true }
     );
-
-    console.log('Updated user:', user); // Debug
     res.status(200).json({ message: 'Device token updated successfully', user });
   } catch (error) {
     console.error('Error updating device token:', error);
@@ -76,10 +80,9 @@ const updateDeviceToken = async (req, res) => {
   }
 };
 
-
 module.exports = {
   createOrUpdateUser,
   getUserById,
   getAllUsers,
-  updateDeviceToken, // Export the new function
+  updateDeviceToken,
 };

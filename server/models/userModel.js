@@ -17,15 +17,15 @@ const userSchema = new mongoose.Schema(
       unique: true,
     },
     profilePic: {
-      type: String, // URL of the profile picture
-      default: "https://via.placeholder.com/150", // Default placeholder image
+      type: String,
+      default: "https://via.placeholder.com/150",
     },
     skillsOffered: {
-      type: [String], // Store skill names directly
+      type: [String],
       default: [],
     },
     skillsWanted: {
-      type: [String], // Store skill names directly
+      type: [String],
       default: [],
     },
     rating: {
@@ -40,11 +40,23 @@ const userSchema = new mongoose.Schema(
       },
     ],
     deviceTokens: {
-      type: [String], // Store multiple FCM tokens for different devices
+      type: [String],
       default: [],
+    },
+    location: {
+      type: String,
+      default: '',
     },
   },
   { timestamps: true }
 );
+
+// Calculate and update user rating
+userSchema.methods.updateRating = async function () {
+  const reviews = await mongoose.model('Review').find({ reviewee: this._id });
+  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+  this.rating = reviews.length > 0 ? totalRating / reviews.length : 0;
+  await this.save();
+};
 
 module.exports = mongoose.model('User', userSchema);
