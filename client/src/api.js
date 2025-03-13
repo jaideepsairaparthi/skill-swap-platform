@@ -21,7 +21,9 @@ const fetchWithAuth = async (url, options = {}) => {
   }
 
   try {
-    console.log('Making request to:', url, 'with options:', options); // Debugging
+    console.log('Sending request to API:', url);
+    console.log('Request Options:', JSON.stringify(options, null, 2)); // Debugging
+
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -31,18 +33,15 @@ const fetchWithAuth = async (url, options = {}) => {
       },
     });
 
+    console.log("Response Status:", response.status);
+    const responseData = await response.json();
+    console.log("Response Data:", responseData);
+
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error(`Error ${response.status}:`, errorData);
-      return { error: errorData.message || `HTTP Error: ${response.status}` };
+      return { error: responseData.message || `HTTP Error: ${response.status}` };
     }
-
-    // Handle empty responses (e.g., 204 No Content)
-    if (response.status === 204) {
-      return { data: null };
-    }
-
-    return { data: await response.json() };
+    
+    return { data: responseData };
   } catch (error) {
     console.error('Network error:', error);
     return { error: 'Network error' };
