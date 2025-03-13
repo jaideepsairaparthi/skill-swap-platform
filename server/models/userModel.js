@@ -51,12 +51,4 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Calculate and update user rating
-userSchema.methods.updateRating = async function () {
-  const reviews = await mongoose.model('Review').find({ reviewee: this._id });
-  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-  this.rating = reviews.length > 0 ? totalRating / reviews.length : 0;
-  await this.save();
-};
-
 module.exports = mongoose.model('User', userSchema);

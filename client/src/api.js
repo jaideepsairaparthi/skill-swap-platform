@@ -116,13 +116,16 @@ export const requestSkillSwap = async (targetUserId, skillName) => {
 
   const { data, error } = await fetchWithAuth(`${API_BASE_URL}/skill-swap/request`, {
     method: 'POST',
-    body: JSON.stringify({ targetUserId, skillName }), // Use skillName instead of skillId
+    body: JSON.stringify({ targetUserId, skillName }),
   });
+
   if (error) {
     console.error('Error requesting skill swap:', error);
-    return null; // Return null in case of error
+    return null;
   }
-  return data; // Return the match object
+
+  console.log('Skill swap request successful:', data);
+  return data;
 };
 
 // Update Device Token

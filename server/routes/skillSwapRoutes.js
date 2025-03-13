@@ -12,7 +12,7 @@ router.post(
   authenticate,
   validate([
     body('targetUserId').notEmpty().withMessage('Target user ID is required'),
-    body('skillName').notEmpty().withMessage('Skill name is required'), // Use skillName instead of skillId
+    body('skillName').notEmpty().withMessage('Skill name is required'),
   ]),
   requestSkillSwap
 );

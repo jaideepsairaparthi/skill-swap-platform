@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 const matchSchema = new mongoose.Schema({
   userA: {
-    type: String,
+    type: String, // Firebase UID of userA
     required: true,
   },
   userB: {
-    type: String,
+    type: String, // Firebase UID of userB
     required: true,
   },
   skillExchanged: {
