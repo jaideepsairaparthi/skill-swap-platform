@@ -11,8 +11,16 @@ router.post(
   '/skill-swap/request',
   authenticate,
   validate([
-    body('targetUserId').notEmpty().withMessage('Target user ID is required'),
-    body('skillName').notEmpty().withMessage('Skill name is required'),
+    body('targetUserId')
+      .notEmpty()
+      .withMessage('Target user ID is required')
+      .isString()
+      .withMessage('Target user ID must be a string'),
+    body('skillName')
+      .notEmpty()
+      .withMessage('Skill name is required')
+      .isString()
+      .withMessage('Skill name must be a string'),
   ]),
   requestSkillSwap
 );

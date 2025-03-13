@@ -5,10 +5,15 @@ const sendNotification = require('../utils/notificationHelper');
 const requestSkillSwap = async (req, res) => {
   console.log("Incoming Request Body:", req.body); // Debugging
   console.log("Authenticated User UID:", req.user.uid); // Debugging
+
   const { targetUserId, skillName } = req.body;
   const requesterUserId = req.user.uid;
 
   try {
+    if (!targetUserId || !skillName) {
+      return res.status(400).json({ message: 'Both targetUserId and skillName are required' });
+    }
+
     if (requesterUserId === targetUserId) {
       return res.status(400).json({ message: 'You cannot request a skill swap with yourself' });
     }
@@ -18,7 +23,12 @@ const requestSkillSwap = async (req, res) => {
       return res.status(404).json({ message: 'Target user not found' });
     }
 
-    // Check if skill exists (case-insensitive match)
+    // Ensure skillsOffered exists to prevent crashes
+    if (!Array.isArray(targetUser.skillsOffered)) {
+      return res.status(400).json({ message: 'Target user has no skills offered' });
+    }
+
+    // Check if the target user offers the skill
     const skillExists = targetUser.skillsOffered.some(
       (skill) => skill.toLowerCase() === skillName.toLowerCase()
     );
@@ -48,12 +58,13 @@ const requestSkillSwap = async (req, res) => {
 
     await match.save();
 
-    // Notify the target user
+    // Fetch the requester user
     const requester = await User.findOne({ firebaseUID: requesterUserId });
     if (!requester) {
       return res.status(404).json({ message: 'Requester user not found' });
     }
 
+    // Send notification
     await sendNotification(
       targetUser._id,
       'New Skill Swap Request',
