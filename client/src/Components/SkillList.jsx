@@ -43,28 +43,16 @@ const SkillList = () => {
   }, [searchQuery, users]);
 
   const handleSkillSwap = async (targetUserId, skillName) => {
-    if (!targetUserId || !skillName) {
-      console.error("Invalid skill swap request: Missing data", { targetUserId, skillName });
-      return alert("Invalid request: Please select a skill and user.");
-    }
-  
-    console.log("Requesting skill swap with:", { targetUserId, skillName });
-  
     try {
-      const response = await requestSkillSwap(targetUserId, skillName);
-      if (response.error) {
-        console.error("Error in skill swap request:", response.error);
-        return alert(`Failed: ${response.error}`);
-      }
-  
-      console.log("Skill swap request successful:", response);
-      alert("Skill swap request sent successfully!");
+      console.log('Requesting skill swap with target user:', targetUserId);
+      const response = await requestSkillSwap(targetUserId, skillName); // Pass skillName
+      console.log('Skill swap request successful:', response);
+      alert('Skill swap request sent successfully!');
     } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred. Please try again.");
+      console.error('Error requesting skill swap:', error);
+      alert('Failed to send skill swap request. Please try again.');
     }
   };
-  
 
   // Pagination logic
   const indexOfLastUser = currentPage * usersPerPage;

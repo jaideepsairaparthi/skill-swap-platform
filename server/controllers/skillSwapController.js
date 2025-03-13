@@ -5,7 +5,6 @@ const sendNotification = require('../utils/notificationHelper');
 const requestSkillSwap = async (req, res) => {
   console.log("Incoming Request Body:", req.body); // Debugging
   console.log("Authenticated User UID:", req.user.uid); // Debugging
-  
   const { targetUserId, skillName } = req.body;
   const requesterUserId = req.user.uid;
 

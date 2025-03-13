@@ -14,10 +14,6 @@ router.post(
     body('targetUserId').notEmpty().withMessage('Target user ID is required'),
     body('skillName').notEmpty().withMessage('Skill name is required'),
   ]),
-  (req, res, next) => {
-    console.log("Validation Errors:", req.validationErrors);
-    next();
-  },
   requestSkillSwap
 );
 
