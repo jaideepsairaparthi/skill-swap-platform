@@ -44,7 +44,7 @@ const SkillList = () => {
 
   const handleSkillSwap = async (targetUserId, skillName) => {
     try {
-      console.log('Requesting skill swap with target user:', targetUserId); // Debug
+      console.log('Requesting skill swap with target user:', targetUserId);
       const response = await requestSkillSwap(targetUserId, skillName); // Pass skillName
       console.log('Skill swap request successful:', response);
       alert('Skill swap request sent successfully!');
