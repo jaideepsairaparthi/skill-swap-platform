@@ -1,20 +1,10 @@
 const express = require('express');
-const { body } = require('express-validator');
-const { requestSkillSwap } = require('../controllers/skillSwapController');
+const { getAllSkills } = require('../controllers/skillController');
 const authenticate = require('../middlewares/auth');
-const validate = require('../middlewares/validate');
 
 const router = express.Router();
 
-// Request Skill Swap
-router.post(
-  '/skill-swap/request',
-  authenticate,
-  validate([
-    body('targetUserId').notEmpty().withMessage('Target user ID is required'),
-    body('skillName').notEmpty().withMessage('Skill name is required'), // Use skillName instead of skillId
-  ]),
-  requestSkillSwap
-);
+// Get All Skills
+router.get('/skills', authenticate, getAllSkills);
 
 module.exports = router;
