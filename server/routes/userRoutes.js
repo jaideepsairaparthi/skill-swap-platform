@@ -38,17 +38,6 @@ router.get(
 // Get All Users (with pagination)
 router.get('/users', authenticate, getAllUsers);
 
-// Request Skill Swap
-router.post(
-  '/skill-swap/request',
-  authenticate,
-  validate([
-    body('targetUserId').notEmpty().withMessage('Target user ID is required'),
-    body('skillId').notEmpty().withMessage('Skill ID is required'),
-  ]),
-  requestSkillSwap
-);
-
 // Update Device Token
 router.post(
   '/user/update-device-token',

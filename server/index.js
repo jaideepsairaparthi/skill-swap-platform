@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
+const skillSwapRoutes = require('./routes/skillSwapRoutes')
 const matchRoutes = require('./routes/matchRoutes');
 const reviewRoutes = require('./routes/reviewRoutes'); // Add review routes
 const skillRoutes = require('./routes/skillRoutes'); // Add skill routes
@@ -46,6 +47,7 @@ app.use(cors(corsOptions));
 
 // Routes
 app.use('/api', authenticate, userRoutes);
+app.use('/api', authenticate, skillSwapRoutes);
 app.use('/api', authenticate, matchRoutes);
 app.use('/api', authenticate, reviewRoutes); // Add review routes
 app.use('/api', authenticate, skillRoutes); // Add skill routes
