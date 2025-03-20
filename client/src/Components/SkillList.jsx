@@ -173,7 +173,6 @@ const SkillList = () => {
             <button
               className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
               onClick={() => handleSkillSwap(user.firebaseUID, selectedSkills[user.firebaseUID])}
-              disabled={!selectedSkills[user.firebaseUID] || !user.skillsOffered?.length}
             >
               Request Skill Swap
             </button>
