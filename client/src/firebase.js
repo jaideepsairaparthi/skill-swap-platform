@@ -1,4 +1,3 @@
-// src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getMessaging, onMessage } from 'firebase/messaging';
@@ -28,13 +27,12 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-
 onMessage(messaging, (payload) => {
   console.log('Message received. ', payload);
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: 'public\vite.svg', // Replace with your app's icon
+    icon: 'public/vite.svg', // Replace with your app's icon
   };
 
   new Notification(notificationTitle, notificationOptions);

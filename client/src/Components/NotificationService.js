@@ -1,8 +1,6 @@
-// src/components/NotificationService.js
 import { messaging } from '../firebase';
 import { getToken } from 'firebase/messaging';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+import { updateDeviceToken } from './api'; // Import the updateDeviceToken function
 
 const requestNotificationPermission = async () => {
   try {
@@ -21,19 +19,10 @@ const requestNotificationPermission = async () => {
 
 const sendTokenToBackend = async (token) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/update-device-token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-      },
-      body: JSON.stringify({ token }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to send token to backend');
+    const result = await updateDeviceToken(token); // Use the updateDeviceToken function
+    if (result?.error) {
+      throw new Error(result.error);
     }
-
     console.log('Token sent to backend successfully');
   } catch (error) {
     console.error('Error sending token to backend:', error);

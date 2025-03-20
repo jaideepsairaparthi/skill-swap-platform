@@ -132,18 +132,20 @@ export const requestSkillSwap = async (targetUserId, skillName) => {
 export const updateDeviceToken = async (token) => {
   if (!token) {
     console.error('Device token is required');
-    return null;
+    return { error: 'Device token is required' };
   }
 
   const { data, error } = await fetchWithAuth(`${API_BASE_URL}/user/update-device-token`, {
     method: 'POST',
     body: JSON.stringify({ token }),
   });
+
   if (error) {
     console.error('Error updating device token:', error);
-    return null; // Return null in case of error
+    return { error };
   }
-  return data; // Return the updated user object
+
+  return { data };
 };
 
 

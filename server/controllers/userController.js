@@ -65,14 +65,19 @@ const getAllUsers = async (req, res) => {
 // Update Device Token
 const updateDeviceToken = async (req, res) => {
   const { token } = req.body;
-  const userId = req.user.uid;
+  const userId = req.user.uid; // Firebase UID of the logged-in user
 
   try {
     const user = await User.findOneAndUpdate(
       { firebaseUID: userId },
-      { $addToSet: { deviceTokens: token } },
+      { $addToSet: { deviceTokens: token } }, // Add token if it doesn't exist
       { new: true }
     );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     res.status(200).json({ message: 'Device token updated successfully', user });
   } catch (error) {
     console.error('Error updating device token:', error);

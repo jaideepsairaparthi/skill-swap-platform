@@ -9,7 +9,7 @@ const {
 } = require('../controllers/userController');
 const authenticate = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
-const { requestSkillSwap } = require('../controllers/skillSwapController');
+// const { requestSkillSwap } = require('../controllers/skillSwapController');
 
 const router = express.Router();
 
@@ -42,7 +42,9 @@ router.get('/users', authenticate, getAllUsers);
 router.post(
   '/user/update-device-token',
   authenticate,
-  validate([body('token').notEmpty().withMessage('Token is required')]),
+  validate([
+    body('token').notEmpty().withMessage('Device token is required'),
+  ]),
   updateDeviceToken
 );
 
