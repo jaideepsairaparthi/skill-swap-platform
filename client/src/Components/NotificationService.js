@@ -1,6 +1,6 @@
 import { messaging } from '../firebase';
 import { getToken } from 'firebase/messaging';
-import { updateDeviceToken } from './api'; // Import the updateDeviceToken function
+import { updateDeviceToken } from '../api'; // Import the updateDeviceToken function
 
 const requestNotificationPermission = async () => {
   try {
