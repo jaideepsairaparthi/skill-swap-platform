@@ -8,7 +8,7 @@ const SkillList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedSkill, setSelectedSkill] = useState(null); // Track selected skill
+  const [selectedSkills, setSelectedSkills] = useState({}); // Track selected skill per user
   const usersPerPage = 6;
 
   useEffect(() => {
@@ -63,6 +63,13 @@ const SkillList = () => {
       console.error('Error requesting skill swap:', error);
       alert('Failed to send skill swap request. Please try again.');
     }
+  };
+
+  const handleSkillSelect = (userId, skill) => {
+    setSelectedSkills((prev) => ({
+      ...prev,
+      [userId]: skill, // Set the selected skill for the specific user
+    }));
   };
 
   const indexOfLastUser = currentPage * usersPerPage;
@@ -136,9 +143,9 @@ const SkillList = () => {
                     <span
                       key={index}
                       className={`inline-block bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full mr-2 mb-2 cursor-pointer ${
-                        selectedSkill === skill ? 'bg-blue-500 text-white' : ''
+                        selectedSkills[user.firebaseUID] === skill ? 'bg-blue-500 text-white' : ''
                       }`}
-                      onClick={() => setSelectedSkill(skill)}
+                      onClick={() => handleSkillSelect(user.firebaseUID, skill)}
                     >
                       {skill}
                     </span>
@@ -165,8 +172,8 @@ const SkillList = () => {
             </div>
             <button
               className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
-              onClick={() => handleSkillSwap(user.firebaseUID, selectedSkill)}
-              disabled={!selectedSkill || !user.skillsOffered?.length}
+              onClick={() => handleSkillSwap(user.firebaseUID, selectedSkills[user.firebaseUID])}
+              disabled={!selectedSkills[user.firebaseUID] || !user.skillsOffered?.length}
             >
               Request Skill Swap
             </button>
