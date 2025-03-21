@@ -23,9 +23,19 @@ function App() {
 
   return (
     <>
+    <ToastContainer
+        position="top-right"
+        autoClose={5000} // Ensures toast messages disappear
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="light" // You can set it to "dark" if needed
+      />
       <Navbar />
       <Notifications />
-      <ToastContainer position="top-right" autoClose={5000} /> 
+
       <Routes>
         {/* Default Route: Landing Page */}
         <Route path="/" element={<LandingPage />} />

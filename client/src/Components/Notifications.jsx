@@ -17,14 +17,15 @@ const Notifications = () => {
         body: payload.notification?.body || '',
       };
 
-      // Show toast notification
+      // Show toast notification with a unique ID to avoid stacking
       toast.info(`${newNotification.title}: ${newNotification.body}`, {
         position: 'top-right',
-        autoClose: 5000,
+        autoClose: 5000, // ✅ Ensures toast disappears
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
+        toastId: newNotification.title, // ✅ Prevents duplicate toasts
       });
 
       // Store notification in state
