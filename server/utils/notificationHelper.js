@@ -4,19 +4,19 @@ const Notification = require('../models/Notification');
 
 const sendNotification = async (userId, title, body) => {
   try {
-    // Save the notification in the database
+    // ✅ Save the notification in the database with a valid MongoDB ObjectId
     const notification = new Notification({ userId, title, body, read: false });
     await notification.save();
     console.log('✅ Notification saved to database:', notification);
 
-    // Fetch the user's device tokens
+    // ✅ Fetch the user's device tokens
     const user = await User.findOne({ firebaseUID: userId });
     if (!user || !user.deviceTokens || user.deviceTokens.length === 0) {
       console.log('❌ User not found or no device tokens available');
-      return;
+      return notification; // Return saved notification
     }
 
-    // Send the notification via FCM
+    // ✅ Send the notification via FCM
     const message = {
       notification: { title, body },
       tokens: user.deviceTokens,
@@ -25,7 +25,7 @@ const sendNotification = async (userId, title, body) => {
     const response = await admin.messaging().sendEachForMulticast(message);
     console.log('🚀 Notification sent successfully:', response);
 
-    // Handle failed tokens
+    // ✅ Handle failed tokens
     const invalidTokens = [];
     response.responses.forEach((resp, index) => {
       if (!resp.success) {
@@ -36,7 +36,7 @@ const sendNotification = async (userId, title, body) => {
       }
     });
 
-    // Remove invalid tokens from the database
+    // ✅ Remove invalid tokens from the database
     if (invalidTokens.length > 0) {
       await User.updateOne(
         { firebaseUID: userId },
@@ -44,6 +44,8 @@ const sendNotification = async (userId, title, body) => {
       );
       console.log('🗑 Removed invalid tokens:', invalidTokens);
     }
+
+    return notification; // Return saved notification
   } catch (error) {
     console.error('🔥 Error sending notification:', error);
     throw error;

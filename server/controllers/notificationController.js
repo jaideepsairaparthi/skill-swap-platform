@@ -28,10 +28,12 @@ const getUserNotifications = async (req, res) => {
   }
 };
 
-// ✅ Mark Notification as Read
+
 const markNotificationAsRead = async (req, res) => {
   try {
-    const { id } = req.params; // Ensure correct parameter name
+    const { id } = req.params;
+
+    // ✅ Ensure `id` is a valid MongoDB ObjectId
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'Invalid notification ID format' });
     }

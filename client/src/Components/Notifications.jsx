@@ -22,27 +22,27 @@ const Notifications = () => {
 
     // Listen for real-time Firebase notifications
     const unsubscribe = onMessage(messaging, async (payload) => {
-      console.log('📩 New Notification:', payload);
-
-      const newNotification = {
-        _id: payload.messageId || `${new Date().getTime()}`, // Ensure valid ID
-        title: payload.notification?.title || 'New Notification',
-        body: payload.notification?.body || '',
-        read: false
-      };
-
-      // Show toast notification
-      toast.info(`${newNotification.title}: ${newNotification.body}`, {
-        position: 'top-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
+        console.log('📩 New Notification:', payload);
+      
+        const newNotification = {
+          _id: new Date().getTime().toString(), // Use a valid temporary ID
+          title: payload.notification?.title || 'New Notification',
+          body: payload.notification?.body || '',
+          read: false,
+        };
+      
+        // Show toast notification
+        toast.info(`${newNotification.title}: ${newNotification.body}`, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      
+        setNotifications((prev) => [newNotification, ...prev]);
       });
-
-      setNotifications((prev) => [newNotification, ...prev]);
-    });
 
     return () => unsubscribe();
   }, []);
