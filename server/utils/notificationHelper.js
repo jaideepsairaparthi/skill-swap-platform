@@ -23,7 +23,7 @@ const sendNotification = async (userId, title, body) => {
     // ✅ Store notifications in MongoDB using `messageId`
     response.responses.forEach(async (resp, index) => {
       if (resp.success) {
-        const messageId = response.multicastId + '-' + index; // Generate unique ID
+        const messageId = `${response.multicastId}-${index}`; // Generate unique ID
         const notification = new Notification({
           _id: messageId, // ✅ Use messageId as `_id`
           userId,

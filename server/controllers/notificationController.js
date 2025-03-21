@@ -27,12 +27,12 @@ const getUserNotifications = async (req, res) => {
   }
 };
 
-// ✅ Mark Notification as Read
+
 const markNotificationAsRead = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // ✅ No need for ObjectId validation, since we're using messageId
+    // ✅ No need for ObjectId validation, since `_id` is a string
     const updatedNotification = await Notification.findByIdAndUpdate(
       id,
       { read: true },
