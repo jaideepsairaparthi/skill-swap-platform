@@ -181,3 +181,21 @@ export const fetchMatches = async (userId) => {
       }
       return data;
     };
+
+    // Fetch Notifications
+export const fetchNotifications = async () => {
+  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/notifications`);
+  if (error) {
+    console.error('Error fetching notifications:', error);
+    return [];
+  }
+  return data.notifications;
+};
+
+// Mark Notification as Read
+export const markNotificationAsRead = async (notificationId) => {
+  const { error } = await fetchWithAuth(`${API_BASE_URL}/notifications/${notificationId}/read`, {
+    method: 'PATCH',
+  });
+  if (error) console.error('Error marking notification as read:', error);
+};

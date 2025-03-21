@@ -3,7 +3,7 @@ const { body } = require('express-validator');
 const { sendNotification } = require('../controllers/notificationController');
 const authenticate = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
-
+const { getUserNotifications } = require('../controllers/notificationController');
 const router = express.Router();
 
 // Send Notification
@@ -17,5 +17,7 @@ router.post(
   ]),
   sendNotification
 );
+
+router.get('/notifications', authenticate, getUserNotifications);
 
 module.exports = router;

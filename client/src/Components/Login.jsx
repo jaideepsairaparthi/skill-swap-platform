@@ -15,27 +15,31 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Basic validation
+  
     if (!email || !password) {
       setError('Please fill in all fields.');
       return;
     }
-
+  
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       const user = result.user;
-
+  
       console.log('User Info:', user);
       const token = await user.getIdToken();
       console.log('Firebase Token:', token);
-
-      login(user); // Call the login function
-      toast.success('Login successful! Redirecting to dashboard...');
-      setTimeout(() => navigate('/dashboard'), 2000); // Redirect after 2 seconds
+  
+      login(user); // Call login function
+  
+      // Show success toast and redirect when it disappears
+      toast.success('Login successful! Redirecting...', {
+        autoClose: 2000, // Close after 2 seconds
+        onClose: () => navigate('/dashboard'), // Redirect after toast disappears
+      });
     } catch (error) {
       console.error('Error during sign-in:', error);
       switch (error.code) {
@@ -53,30 +57,38 @@ const Login = () => {
       }
     }
   };
+  
 
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
+  
       console.log('User Info:', user);
       const token = await user.getIdToken();
       console.log('Firebase Token:', token);
-
-      login(user); // Call the login function
-      toast.success('Login successful! Redirecting to dashboard...');
-      setTimeout(() => navigate('/dashboard'), 2000); // Redirect after 2 seconds
+  
+      login(user);
+  
+      toast.success('Login successful! Redirecting...', {
+        autoClose: 2000,
+        onClose: () => navigate('/dashboard'),
+      });
     } catch (error) {
       console.error('Error during Google sign-in:', error);
       toast.error('Failed to login with Google. Please try again.');
     }
   };
-
+  
   const handleGuestLogin = () => {
-    guestLogin(); // Call guestLogin function
-    toast.success('Guest login successful! Redirecting to dashboard...');
-    setTimeout(() => navigate('/dashboard'), 2000); // Redirect after 2 seconds
+    guestLogin();
+  
+    toast.success('Guest login successful! Redirecting...', {
+      autoClose: 2000,
+      onClose: () => navigate('/dashboard'),
+    });
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-6">
@@ -203,18 +215,7 @@ const Login = () => {
         </p>
       </div>
 
-      {/* Toast Container */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      
     </div>
   );
 };
