@@ -9,7 +9,7 @@ const sendNotificationController = async (req, res) => {
     await sendNotification(userId, title, body);
     res.status(200).json({ message: 'Notification sent successfully' });
   } catch (error) {
-    console.error('Error sending notification:', error);
+    console.error('❌ Error sending notification:', error);
     res.status(500).json({ message: 'Error sending notification', error: error.message });
   }
 };
@@ -22,31 +22,38 @@ const getUserNotifications = async (req, res) => {
 
     res.status(200).json({ notifications });
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error('❌ Error fetching notifications:', error);
     res.status(500).json({ message: 'Error fetching notifications', error: error.message });
   }
 };
 
-
+//  Mark Notification as Read (Decode messageId)
 const markNotificationAsRead = async (req, res) => {
+  console.log("Received Request:", req.method, req.url);
+  console.log("Request Params:", req.params);
+  console.log("Received ID:", req.params.id);
+
   try {
     const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Invalid notification ID format" });
+    }
 
-    // ✅ No need for ObjectId validation, since `_id` is a string
-    const updatedNotification = await Notification.findByIdAndUpdate(
-      id,
+    const updatedNotification = await Notification.findOneAndUpdate(
+      { messageId: id },
       { read: true },
       { new: true }
     );
 
     if (!updatedNotification) {
-      return res.status(404).json({ message: 'Notification not found' });
+      return res.status(404).json({ message: "Notification not found" });
     }
 
-    res.status(200).json({ message: 'Notification marked as read', notification: updatedNotification });
+    console.log("✅ Notification marked as read:", updatedNotification);
+    res.status(200).json({ message: "Notification marked as read", notification: updatedNotification });
   } catch (error) {
-    console.error('Error marking notification as read:', error);
-    res.status(500).json({ message: 'Error marking notification as read', error: error.message });
+    console.error("❌ Error marking notification as read:", error);
+    res.status(500).json({ message: "Error marking notification as read", error: error.message });
   }
 };
 

@@ -10,7 +10,6 @@ const validate = require('../middlewares/validate');
 
 const router = express.Router();
 
-// ✅ Send Notification
 router.post(
   '/notifications',
   authenticate,
@@ -25,7 +24,8 @@ router.post(
 // ✅ Get User Notifications
 router.get('/notifications', authenticate, getUserNotifications);
 
-// ✅ Mark Notification as Read
+// ✅ Mark Notification as Read (Decode `encodedId`)
 router.patch('/notifications/:id/read', authenticate, markNotificationAsRead);
+
 
 module.exports = router;
