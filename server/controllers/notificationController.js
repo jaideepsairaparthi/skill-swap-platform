@@ -1,7 +1,8 @@
 const sendNotification = require('../utils/notificationHelper');
 const Notification = require('../models/Notification');
+const { ObjectId } = require('mongoose').Types;
 
-// Send Notification
+// ✅ Send Notification
 const sendNotificationController = async (req, res) => {
   const { userId, title, body } = req.body;
 
@@ -14,7 +15,7 @@ const sendNotificationController = async (req, res) => {
   }
 };
 
-// Fetch Notifications for a User
+// ✅ Fetch Notifications for a User
 const getUserNotifications = async (req, res) => {
   try {
     const userId = req.user.firebaseUID; // Get user ID from authenticated request
@@ -27,16 +28,16 @@ const getUserNotifications = async (req, res) => {
   }
 };
 
-// Mark Notification as Read
+// ✅ Mark Notification as Read
 const markNotificationAsRead = async (req, res) => {
   try {
-    const { notificationId } = req.params;
-    if (!notificationId) {
-      return res.status(400).json({ message: 'Notification ID is required' });
+    const { id } = req.params; // Ensure correct parameter name
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid notification ID format' });
     }
 
     const updatedNotification = await Notification.findByIdAndUpdate(
-      notificationId,
+      id,
       { read: true },
       { new: true }
     );
@@ -52,4 +53,8 @@ const markNotificationAsRead = async (req, res) => {
   }
 };
 
-module.exports = { sendNotification: sendNotificationController, getUserNotifications,markNotificationAsRead };
+module.exports = { 
+  sendNotification: sendNotificationController, 
+  getUserNotifications, 
+  markNotificationAsRead 
+};

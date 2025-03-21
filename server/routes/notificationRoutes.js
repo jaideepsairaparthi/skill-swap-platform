@@ -1,13 +1,16 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { sendNotification } = require('../controllers/notificationController');
+const {
+  sendNotification,
+  getUserNotifications,
+  markNotificationAsRead,
+} = require('../controllers/notificationController');
 const authenticate = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
-const { getUserNotifications } = require('../controllers/notificationController');
-const { markNotificationAsRead } = require('../controllers/notificationController');
+
 const router = express.Router();
 
-// Send Notification
+// ✅ Send Notification
 router.post(
   '/notifications',
   authenticate,
@@ -19,8 +22,10 @@ router.post(
   sendNotification
 );
 
+// ✅ Get User Notifications
 router.get('/notifications', authenticate, getUserNotifications);
-router.patch('/notifications/:notificationId/read', authenticate, markNotificationAsRead);
 
+// ✅ Mark Notification as Read
+router.patch('/notifications/:id/read', authenticate, markNotificationAsRead);
 
 module.exports = router;

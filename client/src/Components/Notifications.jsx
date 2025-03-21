@@ -48,18 +48,21 @@ const Notifications = () => {
   }, []);
 
   const handleMarkAsRead = async (id) => {
-    if (!id || markingAsRead) return; // Prevent duplicate requests
-    setMarkingAsRead(true);
-
+    if (!id) return;
+    
     try {
-      await markNotificationAsRead(id);
+      const response = await markNotificationAsRead(id);
+      
+      if (response?.error) {
+        throw new Error(response.error);
+      }
+  
+      // ✅ Update UI state
       setNotifications((prev) =>
         prev.map((notif) => (notif._id === id ? { ...notif, read: true } : notif))
       );
     } catch (error) {
       console.error('❌ Error marking notification as read:', error);
-    } finally {
-      setMarkingAsRead(false);
     }
   };
 
