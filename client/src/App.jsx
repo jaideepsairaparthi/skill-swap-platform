@@ -11,17 +11,21 @@ import LandingPage from './Components/LandingPage';
 import Matches from './Components/Matches'; // Import the Matches component
 import Reviews from './Components/Reviews'; // Import the Reviews component
 import { requestNotificationPermission } from './Components/NotificationService';
+import Notifications from './Components/Notifications'; 
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   const { currentUser } = useAuth();
 
   useEffect(() => {
     requestNotificationPermission();
-  }, []);
+  }, [currentUser]);
 
   return (
     <>
       <Navbar />
+      <Notifications />
+      <ToastContainer position="top-right" autoClose={5000} /> 
       <Routes>
         {/* Default Route: Landing Page */}
         <Route path="/" element={<LandingPage />} />
