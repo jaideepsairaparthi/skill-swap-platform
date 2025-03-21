@@ -27,4 +27,29 @@ const getUserNotifications = async (req, res) => {
   }
 };
 
-module.exports = { sendNotification: sendNotificationController, getUserNotifications };
+// Mark Notification as Read
+const markNotificationAsRead = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    if (!notificationId) {
+      return res.status(400).json({ message: 'Notification ID is required' });
+    }
+
+    const updatedNotification = await Notification.findByIdAndUpdate(
+      notificationId,
+      { read: true },
+      { new: true }
+    );
+
+    if (!updatedNotification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+
+    res.status(200).json({ message: 'Notification marked as read', notification: updatedNotification });
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    res.status(500).json({ message: 'Error marking notification as read', error: error.message });
+  }
+};
+
+module.exports = { sendNotification: sendNotificationController, getUserNotifications,markNotificationAsRead };

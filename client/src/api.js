@@ -194,8 +194,14 @@ export const fetchNotifications = async () => {
 
 // Mark Notification as Read
 export const markNotificationAsRead = async (notificationId) => {
+  if (!notificationId) {
+    console.error('Notification ID is missing.');
+    return;
+  }
+
   const { error } = await fetchWithAuth(`${API_BASE_URL}/notifications/${notificationId}/read`, {
-    method: 'PATCH',
+    method: 'PATCH'
   });
+
   if (error) console.error('Error marking notification as read:', error);
 };

@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
-const skillSwapRoutes = require('./routes/skillSwapRoutes')
+const skillSwapRoutes = require('./routes/skillSwapRoutes');
 const matchRoutes = require('./routes/matchRoutes');
-const reviewRoutes = require('./routes/reviewRoutes'); // Add review routes
-const skillRoutes = require('./routes/skillRoutes'); // Add skill routes
-const notificationRoutes = require('./routes/notificationRoutes'); // Add notification routes
+const reviewRoutes = require('./routes/reviewRoutes');
+const skillRoutes = require('./routes/skillRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const authenticate = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
 
@@ -16,16 +16,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(express.json());
-
 // Database connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.log(err));
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-// CORS
+// CORS Setup
 const allowedOrigins = [
   'http://localhost:5173',
   'https://skill-swap-platform-gp36u3nvj-jaideepsai.vercel.app'
@@ -36,26 +33,30 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
+      console.error(`CORS Error: Origin ${origin} is not allowed`);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: 'GET,POST,PUT,DELETE',
+  methods: 'GET,POST,PUT,PATCH,DELETE', 
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
 
+// Middleware
 app.use(cors(corsOptions));
+app.use(express.json());
 
 // Routes
 app.use('/api', authenticate, userRoutes);
 app.use('/api', authenticate, skillSwapRoutes);
 app.use('/api', authenticate, matchRoutes);
-app.use('/api', authenticate, reviewRoutes); // Add review routes
-app.use('/api', authenticate, skillRoutes); // Add skill routes
-app.use('/api', authenticate, notificationRoutes); // Add notification routes
+app.use('/api', authenticate, reviewRoutes);
+app.use('/api', authenticate, skillRoutes);
+app.use('/api', authenticate, notificationRoutes);
 
 // Default Route
 app.get('/', (req, res) => {
-  res.send('Skill Swap Platform Backend');
+  res.send('Skill Swap Platform Backend is Running!');
 });
 
 // MongoDB Test Route (for debugging)
@@ -82,10 +83,19 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Error Handler Middleware (must be after all routes)
+// Error Handler Middleware
 app.use(errorHandler);
 
-// Start server
+// Start Server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Global Error Handlers
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });

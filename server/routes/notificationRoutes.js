@@ -4,6 +4,7 @@ const { sendNotification } = require('../controllers/notificationController');
 const authenticate = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
 const { getUserNotifications } = require('../controllers/notificationController');
+const { markNotificationAsRead } = require('../controllers/notificationController');
 const router = express.Router();
 
 // Send Notification
@@ -19,5 +20,7 @@ router.post(
 );
 
 router.get('/notifications', authenticate, getUserNotifications);
+router.patch('/notifications/:notificationId/read', authenticate, markNotificationAsRead);
+
 
 module.exports = router;
