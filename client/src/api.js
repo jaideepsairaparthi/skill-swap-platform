@@ -192,8 +192,10 @@ export const fetchNotifications = async () => {
   return data.notifications;
 };
 
+
+
 // Mark Notification as Read
-const handleMarkAsRead = async (messageId) => {
+export const markNotificationAsRead = async (messageId) => {
   if (!messageId) {
     console.error("Error: messageId is missing");
     return;
