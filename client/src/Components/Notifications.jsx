@@ -49,7 +49,7 @@ const Notifications = () => {
 
   const handleMarkAsRead = async (id) => {
     if (!id) return;
-    
+  
     try {
       const response = await markNotificationAsRead(id);
       
@@ -65,6 +65,7 @@ const Notifications = () => {
       console.error('❌ Error marking notification as read:', error);
     }
   };
+  
 
   return (
     <div className="relative">

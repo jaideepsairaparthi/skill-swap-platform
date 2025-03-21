@@ -1,6 +1,5 @@
 const sendNotification = require('../utils/notificationHelper');
 const Notification = require('../models/Notification');
-const { ObjectId } = require('mongoose').Types;
 
 // ✅ Send Notification
 const sendNotificationController = async (req, res) => {
@@ -18,7 +17,7 @@ const sendNotificationController = async (req, res) => {
 // ✅ Fetch Notifications for a User
 const getUserNotifications = async (req, res) => {
   try {
-    const userId = req.user.firebaseUID; // Get user ID from authenticated request
+    const userId = req.user.firebaseUID;
     const notifications = await Notification.find({ userId }).sort({ createdAt: -1 });
 
     res.status(200).json({ notifications });
@@ -28,16 +27,12 @@ const getUserNotifications = async (req, res) => {
   }
 };
 
-
+// ✅ Mark Notification as Read
 const markNotificationAsRead = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // ✅ Ensure `id` is a valid MongoDB ObjectId
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid notification ID format' });
-    }
-
+    // ✅ No need for ObjectId validation, since we're using messageId
     const updatedNotification = await Notification.findByIdAndUpdate(
       id,
       { read: true },
