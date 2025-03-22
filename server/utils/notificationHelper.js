@@ -23,16 +23,23 @@ const sendNotification = async (userId, title, body) => {
         const messageId = response.responses[i].messageId;
         console.log("Generated messageId:", messageId);
 
-        const notification = new Notification({
-          messageId,
-          userId,
-          title,
-          body,
-          read: false,
-        });
+        // ✅ Check if notification already exists before saving
+        const existingNotification = await Notification.findOne({ messageId });
 
-        await notification.save();
-        console.log("Notification saved to database:", notification);
+        if (!existingNotification) {
+          const notification = new Notification({
+            messageId,
+            userId,
+            title,
+            body,
+            read: false,
+          });
+
+          await notification.save();
+          console.log("Notification saved to database:", notification);
+        } else {
+          console.log("Notification already exists, skipping save.");
+        }
       } else {
         console.error("Failed to send notification:", response.responses[i].error);
       }

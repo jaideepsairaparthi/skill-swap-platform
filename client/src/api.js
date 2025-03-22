@@ -201,11 +201,21 @@ export const markNotificationAsRead = async (messageId) => {
     return;
   }
 
-  const encodedId = encodeURIComponent(messageId); // Ensure safe encoding
+  const encodedId = encodeURIComponent(messageId);
+  const token = localStorage.getItem("token"); // Ensure token is retrieved
+
+  if (!token) {
+    console.error("Error: No authentication token found");
+    return;
+  }
+
   try {
     const response = await fetch(`${API_BASE_URL}/notifications/${encodedId}/read`, { 
       method: "PATCH",
-      headers: { "Content-Type": "application/json" }
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` // Include auth token
+      }
     });
 
     if (!response.ok) {
@@ -214,9 +224,10 @@ export const markNotificationAsRead = async (messageId) => {
 
     const result = await response.json();
     console.log("Mark as read response:", result);
-    return result; // Return result to handle in UI
+    return result;
   } catch (error) {
     console.error("Error marking notification as read:", error);
   }
 };
+
 
