@@ -28,7 +28,7 @@ const getUserNotifications = async (req, res) => {
 const markNotificationAsRead = async (req, res) => {
   console.log("Received Request:", req.method, req.url);
   console.log("Request Params:", req.params);
-  console.log("Received ID:", req.params.id); // Debugging
+  console.log("Received messageId:", req.params.id); // Debugging
 
   try {
     const { id } = req.params;
@@ -36,21 +36,22 @@ const markNotificationAsRead = async (req, res) => {
       return res.status(400).json({ message: "Invalid notification ID format" });
     }
 
-    // Check if messageId in DB matches the received ID
+    // Find the notification by messageId
     const notification = await Notification.findOne({ messageId: id });
 
     if (!notification) {
-      console.log(" Notification not found in database. ID:", id);
+      console.log("Notification not found in database. messageId:", id);
       return res.status(404).json({ message: "Notification not found" });
     }
 
+    // Mark as read
     notification.read = true;
     await notification.save();
 
     console.log("Notification marked as read:", notification);
     res.status(200).json({ message: "Notification marked as read", notification });
   } catch (error) {
-    console.error(" Error marking notification as read:", error);
+    console.error("Error marking notification as read:", error);
     res.status(500).json({ message: "Error marking notification as read", error: error.message });
   }
 };

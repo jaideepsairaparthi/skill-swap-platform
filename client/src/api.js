@@ -198,7 +198,7 @@ export const fetchNotifications = async () => {
 export const markNotificationAsRead = async (messageId) => {
   if (!messageId) {
     console.error("Error: messageId is missing");
-    return;
+    return { error: "messageId is required" };
   }
 
   console.log("Marking notification as read. Sent messageId:", messageId); // Debugging
@@ -206,15 +206,22 @@ export const markNotificationAsRead = async (messageId) => {
   const encodedId = encodeURIComponent(messageId); // Encode to handle special characters
 
   try {
-    const response = await fetch(`${API_BASE_URL}/notifications/${encodedId}/read`, { 
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" }
-    });
+    const { data, error } = await fetchWithAuth(
+      `${API_BASE_URL}/notifications/${encodedId}/read`,
+      {
+        method: "PATCH",
+      }
+    );
 
-    const result = await response.json();
-    console.log("Mark as read response:", result);
+    if (error) {
+      console.error("Error marking notification as read:", error);
+      return { error };
+    }
+
+    return { data };
   } catch (error) {
     console.error("Error marking notification as read:", error);
+    return { error: "Network error" };
   }
 };
 

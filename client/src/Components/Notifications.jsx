@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { onMessage } from 'firebase/messaging';
-import { messaging } from '../firebase';
-import { toast } from 'react-toastify';
-import { fetchNotifications, markNotificationAsRead } from '../api';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useState, useEffect } from "react";
+import { onMessage } from "firebase/messaging";
+import { messaging } from "../firebase";
+import { toast } from "react-toastify";
+import { fetchNotifications, markNotificationAsRead } from "../api";
+import "react-toastify/dist/ReactToastify.css";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -22,50 +22,51 @@ const Notifications = () => {
 
     // Listen for real-time Firebase notifications
     const unsubscribe = onMessage(messaging, async (payload) => {
-        console.log('📩 New Notification:', payload);
-      
-        const newNotification = {
-          _id: new Date().getTime().toString(), // Use a valid temporary ID
-          title: payload.notification?.title || 'New Notification',
-          body: payload.notification?.body || '',
-          read: false,
-        };
-      
-        // Show toast notification
-        toast.info(`${newNotification.title}: ${newNotification.body}`, {
-          position: 'top-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      
-        setNotifications((prev) => [newNotification, ...prev]);
+      console.log("📩 New Notification:", payload);
+
+      const newNotification = {
+        _id: new Date().getTime().toString(), // Use a valid temporary ID
+        title: payload.notification?.title || "New Notification",
+        body: payload.notification?.body || "",
+        read: false,
+      };
+
+      // Show toast notification
+      toast.info(`${newNotification.title}: ${newNotification.body}`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
       });
+
+      setNotifications((prev) => [newNotification, ...prev]);
+    });
 
     return () => unsubscribe();
   }, []);
 
-  const handleMarkAsRead = async (id) => {
-    if (!id) return;
-  
+  const handleMarkAsRead = async (messageId) => {
+    if (!messageId) return;
+
     try {
-      const response = await markNotificationAsRead(id);
-      
+      const response = await markNotificationAsRead(messageId);
+
       if (response?.error) {
         throw new Error(response.error);
       }
-  
-      // ✅ Update UI state
+
+      // Update UI state
       setNotifications((prev) =>
-        prev.map((notif) => (notif._id === id ? { ...notif, read: true } : notif))
+        prev.map((notif) =>
+          notif.messageId === messageId ? { ...notif, read: true } : notif
+        )
       );
     } catch (error) {
-      console.error('❌ Error marking notification as read:', error);
+      console.error("❌ Error marking notification as read:", error);
     }
   };
-  
 
   return (
     <div className="relative">
@@ -99,23 +100,27 @@ const Notifications = () => {
           {loading ? (
             <p className="text-center py-4">Loading...</p>
           ) : notifications.length === 0 ? (
-            <p className="text-center text-gray-500 py-4">No new notifications</p>
+            <p className="text-center text-gray-500 py-4">
+              No new notifications
+            </p>
           ) : (
             <ul className="max-h-60 overflow-y-auto">
               {notifications.map((notif) => (
                 <li
-                  key={notif._id}
-                  className={`p-3 border-b ${notif.read ? 'text-gray-500' : 'font-bold'}`}
+                  key={notif.messageId} // Use messageId as the key
+                  className={`p-3 border-b ${
+                    notif.read ? "text-gray-500" : "font-bold"
+                  }`}
                 >
                   <strong>{notif.title}</strong>
                   <p>{notif.body}</p>
                   {!notif.read && (
                     <button
                       className="text-blue-500 text-sm mt-1"
-                      onClick={() => handleMarkAsRead(notif._id)}
+                      onClick={() => handleMarkAsRead(notif.messageId)} // Pass messageId
                       disabled={markingAsRead}
                     >
-                      {markingAsRead ? 'Marking...' : 'Mark as Read'}
+                      {markingAsRead ? "Marking..." : "Mark as Read"}
                     </button>
                   )}
                 </li>

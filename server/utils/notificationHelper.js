@@ -23,12 +23,12 @@ const sendNotification = async (userId, title, body) => {
         const messageId = response.responses[i].messageId;
         console.log("Generated messageId:", messageId);
 
-        // ✅ Check if notification already exists before saving
+        // Check if notification already exists before saving
         const existingNotification = await Notification.findOne({ messageId });
 
         if (!existingNotification) {
           const notification = new Notification({
-            messageId,
+            messageId, // Use messageId
             userId,
             title,
             body,
