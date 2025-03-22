@@ -197,11 +197,11 @@ export const fetchNotifications = async () => {
 // Mark Notification as Read
 export const markNotificationAsRead = async (messageId) => {
   if (!messageId) {
-    console.error("Error: messageId is missing");
+    console.error("❌ Error: messageId is missing");
     return { error: "messageId is required" };
   }
 
-  console.log("Marking notification as read. Sent messageId:", messageId); // Debugging
+  console.log("📩 Marking notification as read. Sent messageId:", messageId); // Debugging
 
   const encodedId = encodeURIComponent(messageId); // Encode to handle special characters
 
@@ -214,18 +214,17 @@ export const markNotificationAsRead = async (messageId) => {
     );
 
     if (error) {
-      console.error("Error marking notification as read:", error);
+      console.error("❌ Error marking notification as read:", error);
       return { error };
     }
 
+    console.log("✅ Notification marked as read successfully:", data); // Debugging
     return { data };
   } catch (error) {
-    console.error("Error marking notification as read:", error);
+    console.error("❌ Error marking notification as read:", error);
     return { error: "Network error" };
   }
 };
-
-
 
 
 

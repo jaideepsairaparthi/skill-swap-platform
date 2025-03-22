@@ -26,21 +26,25 @@ const getUserNotifications = async (req, res) => {
 };
 
 const markNotificationAsRead = async (req, res) => {
-  console.log("Received Request:", req.method, req.url);
-  console.log("Request Params:", req.params);
-  console.log("Received messageId:", req.params.id); // Debugging
+  console.log("📩 Received Request:", req.method, req.url);
+  console.log("🆔 Request Params:", req.params);
 
   try {
     const { id } = req.params;
+
     if (!id) {
       return res.status(400).json({ message: "Invalid notification ID format" });
     }
 
+    // Decode the messageId
+    const decodedMessageId = decodeURIComponent(id);
+    console.log("🔓 Decoded messageId:", decodedMessageId); // Debugging
+
     // Find the notification by messageId
-    const notification = await Notification.findOne({ messageId: id });
+    const notification = await Notification.findOne({ messageId: decodedMessageId });
 
     if (!notification) {
-      console.log("Notification not found in database. messageId:", id);
+      console.log("❌ Notification not found in database. messageId:", decodedMessageId);
       return res.status(404).json({ message: "Notification not found" });
     }
 
@@ -48,10 +52,10 @@ const markNotificationAsRead = async (req, res) => {
     notification.read = true;
     await notification.save();
 
-    console.log("Notification marked as read:", notification);
+    console.log("✅ Notification marked as read:", notification); // Debugging
     res.status(200).json({ message: "Notification marked as read", notification });
   } catch (error) {
-    console.error("Error marking notification as read:", error);
+    console.error("❌ Error marking notification as read:", error);
     res.status(500).json({ message: "Error marking notification as read", error: error.message });
   }
 };

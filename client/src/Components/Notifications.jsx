@@ -9,7 +9,6 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [markingAsRead, setMarkingAsRead] = useState(false);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -20,26 +19,17 @@ const Notifications = () => {
 
     loadNotifications();
 
-    // Listen for real-time Firebase notifications
     const unsubscribe = onMessage(messaging, async (payload) => {
       console.log("📩 New Notification:", payload);
 
       const newNotification = {
-        _id: new Date().getTime().toString(), // Use a valid temporary ID
+        messageId: payload.messageId || `projects/skillswap-3f118/messages/${new Date().getTime().toString()}`, // Use full messageId format
         title: payload.notification?.title || "New Notification",
         body: payload.notification?.body || "",
         read: false,
       };
 
-      // Show toast notification
-      toast.info(`${newNotification.title}: ${newNotification.body}`, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      toast.info(`${newNotification.title}: ${newNotification.body}`);
 
       setNotifications((prev) => [newNotification, ...prev]);
     });
@@ -48,21 +38,26 @@ const Notifications = () => {
   }, []);
 
   const handleMarkAsRead = async (messageId) => {
-    if (!messageId) return;
+    if (!messageId) {
+      console.error("❌ Error: messageId is missing");
+      return;
+    }
+
+    console.log("📩 Marking notification as read. messageId:", messageId);
 
     try {
       const response = await markNotificationAsRead(messageId);
-
       if (response?.error) {
         throw new Error(response.error);
       }
 
-      // Update UI state
       setNotifications((prev) =>
         prev.map((notif) =>
           notif.messageId === messageId ? { ...notif, read: true } : notif
         )
       );
+
+      console.log("✅ Notification marked as read:", messageId);
     } catch (error) {
       console.error("❌ Error marking notification as read:", error);
     }
@@ -70,7 +65,6 @@ const Notifications = () => {
 
   return (
     <div className="relative">
-      {/* Notification Button */}
       <button
         className="bg-gray-800 text-white px-4 py-2 rounded-md relative flex items-center"
         onClick={() => setShowDropdown(!showDropdown)}
@@ -83,7 +77,6 @@ const Notifications = () => {
         )}
       </button>
 
-      {/* Notification Dropdown */}
       {showDropdown && (
         <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg p-4 z-50">
           <div className="flex justify-between items-center border-b pb-2">
@@ -96,31 +89,25 @@ const Notifications = () => {
             </button>
           </div>
 
-          {/* Notification List */}
           {loading ? (
             <p className="text-center py-4">Loading...</p>
           ) : notifications.length === 0 ? (
-            <p className="text-center text-gray-500 py-4">
-              No new notifications
-            </p>
+            <p className="text-center text-gray-500 py-4">No new notifications</p>
           ) : (
             <ul className="max-h-60 overflow-y-auto">
               {notifications.map((notif) => (
                 <li
-                  key={notif.messageId} // Use messageId as the key
-                  className={`p-3 border-b ${
-                    notif.read ? "text-gray-500" : "font-bold"
-                  }`}
+                  key={notif.messageId} // Use messageId as the unique key
+                  className={`p-3 border-b ${notif.read ? "text-gray-500" : "font-bold"}`}
                 >
                   <strong>{notif.title}</strong>
                   <p>{notif.body}</p>
                   {!notif.read && (
                     <button
                       className="text-blue-500 text-sm mt-1"
-                      onClick={() => handleMarkAsRead(notif.messageId)} // Pass messageId
-                      disabled={markingAsRead}
+                      onClick={() => handleMarkAsRead(notif.messageId)}
                     >
-                      {markingAsRead ? "Marking..." : "Mark as Read"}
+                      Mark as Read
                     </button>
                   )}
                 </li>

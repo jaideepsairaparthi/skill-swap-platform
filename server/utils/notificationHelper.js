@@ -5,9 +5,10 @@ const Notification = require("../models/Notification");
 const sendNotification = async (userId, title, body) => {
   try {
     const user = await User.findOne({ firebaseUID: userId });
+
     if (!user || !user.deviceTokens || user.deviceTokens.length === 0) {
       console.log("User not found or no device tokens available");
-      return;
+      return { success: false, message: "User not found or no device tokens available" };
     }
 
     const message = {
@@ -16,37 +17,33 @@ const sendNotification = async (userId, title, body) => {
     };
 
     const response = await admin.messaging().sendEachForMulticast(message);
-    console.log("Notification sent successfully:", response);
+    console.log("✅ Notification sent successfully:", response);
 
-    for (let i = 0; i < response.responses.length; i++) {
-      if (response.responses[i].success && response.responses[i].messageId) {
-        const messageId = response.responses[i].messageId;
-        console.log("Generated messageId:", messageId);
+    if (response.responses.some((resp) => resp.success && resp.messageId)) {
+      const messageId = `projects/skillswap-3f118/messages/${response.responses.find((resp) => resp.success).messageId}`;
 
-        // Check if notification already exists before saving
-        const existingNotification = await Notification.findOne({ messageId });
+      const existingNotification = await Notification.findOne({ messageId });
 
-        if (!existingNotification) {
-          const notification = new Notification({
-            messageId, // Use messageId
-            userId,
-            title,
-            body,
-            read: false,
-          });
+      if (!existingNotification) {
+        const notification = new Notification({
+          messageId,
+          userId,
+          title,
+          body,
+          read: false,
+        });
 
-          await notification.save();
-          console.log("Notification saved to database:", notification);
-        } else {
-          console.log("Notification already exists, skipping save.");
-        }
+        await notification.save();
+        console.log("✅ Notification saved to database:", notification);
       } else {
-        console.error("Failed to send notification:", response.responses[i].error);
+        console.log("⚠️ Notification already exists, skipping save.");
       }
     }
+
+    return { success: true, message: "Notification sent successfully" };
   } catch (error) {
-    console.error("Error sending notification:", error);
-    throw error;
+    console.error("❌ Error sending notification:", error);
+    return { success: false, message: "Error sending notification", error: error.message };
   }
 };
 
