@@ -201,18 +201,23 @@ export const markNotificationAsRead = async (messageId) => {
     return;
   }
 
+  console.log("Marking notification as read. Sent messageId:", messageId); // Debugging
+
   const encodedId = encodeURIComponent(messageId); // Encode to handle special characters
 
-  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/notifications/${encodedId}/read`, {
-    method: "PATCH",
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/notifications/${encodedId}/read`, { 
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" }
+    });
 
-  if (error) {
+    const result = await response.json();
+    console.log("Mark as read response:", result);
+  } catch (error) {
     console.error("Error marking notification as read:", error);
-  } else {
-    console.log("Mark as read response:", data);
   }
 };
+
 
 
 
