@@ -30,34 +30,42 @@ const markNotificationAsRead = async (req, res) => {
   console.log("🆔 Request Params:", req.params);
 
   try {
-    const { id } = req.params;
+    let { id } = req.params;
 
     if (!id) {
       return res.status(400).json({ message: "Invalid notification ID format" });
     }
 
-    // Decode the messageId
+    // 🔥 Decode messageId to match stored format
     const decodedMessageId = decodeURIComponent(id);
     console.log("🔓 Decoded messageId:", decodedMessageId); // Debugging
 
-    // Find the notification by messageId
-    const notification = await Notification.findOne({ messageId: decodedMessageId });
+    // 🔥 Extract only the unique message ID part from the Firebase messageId format
+    const extractedMessageId = decodedMessageId.split("/").pop();
+    console.log("🆔 Extracted messageId:", extractedMessageId); // Debugging
+
+    // 🔥 Query the database for the correct messageId format
+    const notification = await Notification.findOne({
+      messageId: { $regex: extractedMessageId, $options: "i" }, // Case-insensitive match
+    });
 
     if (!notification) {
-      console.log("❌ Notification not found in database. messageId:", decodedMessageId);
+      console.log("❌ Notification not found in database. messageId:", extractedMessageId);
       return res.status(404).json({ message: "Notification not found" });
     }
 
-    // Mark as read
+    // Mark notification as read
     notification.read = true;
     await notification.save();
 
-    console.log("✅ Notification marked as read:", notification); // Debugging
+    console.log("✅ Notification marked as read:", notification);
     res.status(200).json({ message: "Notification marked as read", notification });
   } catch (error) {
     console.error("❌ Error marking notification as read:", error);
     res.status(500).json({ message: "Error marking notification as read", error: error.message });
   }
 };
+
+
 
 module.exports = { sendNotification: sendNotificationController, getUserNotifications, markNotificationAsRead };

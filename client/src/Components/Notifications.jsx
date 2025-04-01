@@ -22,8 +22,13 @@ const Notifications = () => {
     const unsubscribe = onMessage(messaging, async (payload) => {
       console.log("📩 New Notification:", payload);
 
+      // Use the full messageId format
+      const messageId = payload.messageId
+        ? `projects/skillswap-3f118/messages/${payload.messageId}`
+        : `projects/skillswap-3f118/messages/${new Date().getTime().toString()}`;
+
       const newNotification = {
-        messageId: payload.messageId || `projects/skillswap-3f118/messages/${new Date().getTime().toString()}`, // Use full messageId format
+        messageId, // Use the full messageId format
         title: payload.notification?.title || "New Notification",
         body: payload.notification?.body || "",
         read: false,
@@ -42,26 +47,30 @@ const Notifications = () => {
       console.error("❌ Error: messageId is missing");
       return;
     }
-
+  
     console.log("📩 Marking notification as read. messageId:", messageId);
-
+  
+    // Ensure messageId is properly formatted (remove unnecessary encoding issues)
+    const cleanedMessageId = encodeURIComponent(messageId);
+  
     try {
-      const response = await markNotificationAsRead(messageId);
+      const response = await markNotificationAsRead(cleanedMessageId);
       if (response?.error) {
         throw new Error(response.error);
       }
-
+  
       setNotifications((prev) =>
         prev.map((notif) =>
           notif.messageId === messageId ? { ...notif, read: true } : notif
         )
       );
-
+  
       console.log("✅ Notification marked as read:", messageId);
     } catch (error) {
       console.error("❌ Error marking notification as read:", error);
     }
   };
+  
 
   return (
     <div className="relative">

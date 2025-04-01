@@ -13,6 +13,9 @@ import Reviews from './Components/Reviews'; // Import the Reviews component
 import { requestNotificationPermission } from './Components/NotificationService';
 import Notifications from './Components/Notifications'; 
 import { ToastContainer } from 'react-toastify';
+import HomePage from './Components/HomePage';
+import Room from './Components/Room'
+
 
 function App() {
   const { currentUser } = useAuth();
@@ -39,6 +42,10 @@ function App() {
       <Routes>
         {/* Default Route: Landing Page */}
         <Route path="/" element={<LandingPage />} />
+        
+        <Route path="/home" element={<HomePage/>} />
+        <Route path="/room/:id" element={<Room />} />
+
 
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />

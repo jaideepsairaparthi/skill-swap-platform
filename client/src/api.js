@@ -201,30 +201,48 @@ export const markNotificationAsRead = async (messageId) => {
     return { error: "messageId is required" };
   }
 
-  console.log("📩 Marking notification as read. Sent messageId:", messageId); // Debugging
+  console.log("📩 Marking notification as read. Sent messageId:", messageId);
 
-  const encodedId = encodeURIComponent(messageId); // Encode to handle special characters
+  // 🔥 Encode messageId only once to prevent double encoding
+  const encodedId = encodeURIComponent(decodeURIComponent(messageId));
+
+  // Get authentication token
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  if (!user) {
+    console.error("❌ No authenticated user found");
+    return { error: "User not authenticated" };
+  }
 
   try {
-    const { data, error } = await fetchWithAuth(
-      `${API_BASE_URL}/notifications/${encodedId}/read`,
-      {
-        method: "PATCH",
-      }
-    );
-
-    if (error) {
-      console.error("❌ Error marking notification as read:", error);
-      return { error };
+    const token = await user.getIdToken();
+    if (!token) {
+      console.error("❌ No authentication token found");
+      return { error: "Unauthorized" };
     }
 
-    console.log("✅ Notification marked as read successfully:", data); // Debugging
-    return { data };
+    console.log("🔑 Authentication Token Retrieved:", token);
+
+    const response = await fetch(`${API_BASE_URL}/notifications/${encodedId}/read`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("❌ Error marking notification as read:", errorData);
+      return { error: errorData.message || `HTTP Error: ${response.status}` };
+    }
+
+    const result = await response.json();
+    console.log("✅ Notification marked as read successfully:", result);
+    return { data: result };
   } catch (error) {
-    console.error("❌ Error marking notification as read:", error);
+    console.error("❌ Network error while marking notification as read:", error);
     return { error: "Network error" };
   }
 };
-
-
-
