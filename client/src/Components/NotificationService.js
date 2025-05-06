@@ -1,32 +1,67 @@
-import { messaging } from '../firebase';
-import { getToken } from 'firebase/messaging';
-import { updateDeviceToken } from '../api'; // Import the updateDeviceToken function
+import { getMessaging, getToken, isSupported, onMessage } from 'firebase/messaging';
+import { updateDeviceToken } from '../api';
+import { toast } from 'react-toastify';
+import { getAuth } from 'firebase/auth';
+import 'react-toastify/dist/ReactToastify.css';
 
-const requestNotificationPermission = async () => {
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
+const useNotificationService = () => {
+  const requestNotificationPermission = async () => {
+    try {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      
+      if (!currentUser) {
+        console.log('No current user - skipping notification setup');
+        return null;
+      }
+
+      const supported = await isSupported();
+      if (!supported) {
+        console.warn('FCM not supported in this browser/environment');
+        return null;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.warn('Notification permission denied');
+        return null;
+      }
+
+      // Get existing service worker registration
+      const swRegistration = await navigator.serviceWorker.getRegistration();
+      if (!swRegistration) {
+        throw new Error('No service worker registration found');
+      }
+
+      const messaging = getMessaging();
       const token = await getToken(messaging, {
-        vapidKey: 'BM1kELw2hgLNRVlInRoAm8yiJ6N6VAwbgquaa0Q_P0wdobJtZYwvN9r9D2zBFIU0876WxohtEhGTYb2exSGKdsE', // Replace with your actual VAPID key
+        vapidKey: 'BM1kELw2hgLNRVlInRoAm8yiJ6N6VAwbgquaa0Q_P0wdobJtZYwvN9r9D2zBFIU0876WxohtEhGTYb2exSGKdsE',
+        serviceWorkerRegistration: swRegistration
       });
-      console.log('FCM Token:', token);
-      await sendTokenToBackend(token);
+
+      if (!token) {
+        throw new Error('Failed to generate FCM token');
+      }
+
+      await updateDeviceToken(token);
+      console.log('FCM token updated successfully', token);
+
+      // Fixed toast position reference
+      onMessage(messaging, (payload) => {
+        toast.info(payload.notification?.body || 'New notification', {
+          position: toast.POSITION.TOP_RIGHT // Fixed reference
+        });
+      });
+
+      return token;
+
+    } catch (error) {
+      console.warn('Notification service error:', error.message);
+      return null;
     }
-  } catch (error) {
-    console.error('Error requesting notification permission:', error);
-  }
+  };
+
+  return { requestNotificationPermission };
 };
 
-const sendTokenToBackend = async (token) => {
-  try {
-    const result = await updateDeviceToken(token); // Use the updateDeviceToken function
-    if (result?.error) {
-      throw new Error(result.error);
-    }
-    console.log('Token sent to backend successfully');
-  } catch (error) {
-    console.error('Error sending token to backend:', error);
-  }
-};
-
-export { requestNotificationPermission };
+export default useNotificationService;

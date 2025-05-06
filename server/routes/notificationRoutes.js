@@ -10,6 +10,7 @@ const validate = require("../middlewares/validate");
 
 const router = express.Router();
 
+// Send notification to specific user
 router.post(
   "/notifications",
   authenticate,
@@ -21,8 +22,18 @@ router.post(
   sendNotification
 );
 
+// Get notifications for current authenticated user
 router.get("/notifications", authenticate, getUserNotifications);
 
-router.patch("/notifications/:id/read", authenticate, markNotificationAsRead);
+// Mark notification as read - with explicit OPTIONS handler
+router.route("/notifications/:id/read")
+  .options((req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+    res.setHeader('Access-Control-Allow-Methods', 'PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.status(200).end();
+  })
+  .patch(authenticate, markNotificationAsRead);
 
 module.exports = router;

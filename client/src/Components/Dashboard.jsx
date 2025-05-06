@@ -5,136 +5,161 @@ const Dashboard = () => {
   const { currentUser, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-gray-900 p-6 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute -top-40 -left-40 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl animate-pulse-slow"></div>
+      <div className="absolute -bottom-20 -right-20 w-60 h-60 rounded-full bg-purple-500/10 blur-3xl animate-pulse-slow delay-1000"></div>
+      
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <button
-          onClick={logout}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300"
-        >
-          Logout
-        </button>
+      <div className="flex justify-between items-center mb-8 relative z-10">
+        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600">
+          Dashboard
+        </h1>
       </div>
 
       {/* Welcome Message */}
-      <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
-        <p className="text-xl font-semibold text-gray-800">
-          Welcome back, <span className="text-indigo-600">{currentUser?.email}</span>!
+      <div className="bg-gray-800/70 backdrop-blur-lg p-8 rounded-2xl shadow-xl mb-8 border border-gray-700 relative z-10">
+        <p className="text-2xl font-semibold text-white">
+          Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{currentUser?.email}</span>!
         </p>
-        <p className="text-gray-600 mt-2">
-          Here's what's happening on your Skill Swap platform today.
+        <p className="text-gray-400 mt-3">
+          Your personalized skill exchange hub at a glance
         </p>
       </div>
 
       {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
         {/* User Profile Card */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Your Profile</h2>
+        <div className="bg-gray-800/70 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="w-2 h-2 bg-cyan-400 rounded-full mr-2"></span>
+            Your Digital Profile
+          </h2>
           <div className="flex items-center space-x-4">
-            <img
-              src="src\assets\Gemini_Generated_Image_q39v7pq39v7pq39v.jpeg"
-              alt="Profile"
-              className="w-16 h-16 rounded-full"
-            />
+            <div className="relative">
+              <img
+                src="src\assets\Gemini_Generated_Image_q39v7pq39v7pq39v.jpeg"
+                alt="Profile"
+                className="w-16 h-16 rounded-full border-2 border-cyan-400/50"
+              />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-gray-800"></div>
+            </div>
             <div>
-              <p className="text-lg font-semibold text-gray-800">{currentUser?.email}</p>
-              <p className="text-gray-600">Skill Enthusiast</p>
+              <p className="text-lg font-semibold text-white">{currentUser?.email}</p>
+              <p className="text-cyan-400 text-sm">Skill Enthusiast</p>
             </div>
           </div>
-          <button className="w-full mt-4 bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition duration-300">
-            Edit Profile
+          <button className="w-full mt-6 bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-3 rounded-xl hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300">
+            Enhance Profile
           </button>
         </div>
 
         {/* Skills Listing */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Your Skills</h2>
+        <div className="bg-gray-800/70 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
+            Skill Inventory
+          </h2>
           <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <p className="text-gray-800">Web Development</p>
-              <button className="text-indigo-500 hover:text-indigo-600">Edit</button>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-800">Graphic Design</p>
-              <button className="text-indigo-500 hover:text-indigo-600">Edit</button>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-800">Data Analysis</p>
-              <button className="text-indigo-500 hover:text-indigo-600">Edit</button>
-            </div>
+            {['Web Development', 'Graphic Design', 'Data Analysis'].map((skill, i) => (
+              <div key={i} className="flex justify-between items-center bg-gray-700/50 p-3 rounded-lg">
+                <p className="text-gray-300">{skill}</p>
+                <button className="text-purple-400 hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  </svg>
+                </button>
+              </div>
+            ))}
           </div>
-          <button className="w-full mt-4 bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition duration-300">
-            Add New Skill
+          <button className="w-full mt-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
+            + Add New Skill
           </button>
         </div>
 
         {/* Recent Activities */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activities</h2>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-              <p className="text-gray-800">You added a new skill: Web Development</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <p className="text-gray-800">You connected with John Doe</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <p className="text-gray-800">You received a new message</p>
-            </div>
+        <div className="bg-gray-800/70 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-pink-400/20 hover:border-pink-400/40 transition-all duration-300">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="w-2 h-2 bg-pink-400 rounded-full mr-2"></span>
+            Activity Stream
+          </h2>
+          <div className="space-y-4">
+            {[
+              { text: 'Added Web Development skill', color: 'bg-cyan-400' },
+              { text: 'Connected with John Doe', color: 'bg-green-400' },
+              { text: 'Received new message', color: 'bg-yellow-400' }
+            ].map((item, i) => (
+              <div key={i} className="flex items-start space-x-3">
+                <div className={`flex-shrink-0 mt-1 w-2 h-2 ${item.color} rounded-full animate-pulse`}></div>
+                <p className="text-gray-300">{item.text}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Notifications */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Notifications</h2>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <p className="text-gray-800">You have 3 pending requests</p>
+        <div className="bg-gray-800/70 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="w-2 h-2 bg-cyan-400 rounded-full mr-2"></span>
+            Alerts Hub
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1 w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+              <p className="text-gray-300">3 pending requests</p>
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <p className="text-gray-800">New skill swap opportunity available</p>
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <p className="text-gray-300">New skill swap opportunity</p>
             </div>
           </div>
         </div>
 
         {/* Analytics */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Analytics</h2>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <p className="text-gray-800">Total Skills Listed</p>
-              <p className="text-indigo-500 font-semibold">5</p>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-800">Connections Made</p>
-              <p className="text-indigo-500 font-semibold">12</p>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-800">Messages Sent</p>
-              <p className="text-indigo-500 font-semibold">23</p>
-            </div>
+        <div className="bg-gray-800/70 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
+            Performance Metrics
+          </h2>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { label: 'Skills Listed', value: '5', color: 'text-cyan-400' },
+              { label: 'Connections', value: '12', color: 'text-purple-400' },
+              { label: 'Messages', value: '23', color: 'text-pink-400' },
+              { label: 'Swaps', value: '7', color: 'text-green-400' }
+            ].map((metric, i) => (
+              <div key={i} className="bg-gray-700/30 p-3 rounded-lg">
+                <p className="text-gray-400 text-sm">{metric.label}</p>
+                <p className={`text-2xl font-bold ${metric.color}`}>{metric.value}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="bg-gray-800/70 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-pink-400/20 hover:border-pink-400/40 transition-all duration-300">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="w-2 h-2 bg-pink-400 rounded-full mr-2"></span>
+            Quick Launch
+          </h2>
           <div className="space-y-3">
-            <button className="w-full bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition duration-300">
-              Post a Skill
+            <button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-3 rounded-xl hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+              </svg>
+              Post Skill
             </button>
-            <button className="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300">
-              Connect with Peers
+            <button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
+              </svg>
+              Find Peers
             </button>
-            <button className="w-full bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition duration-300">
-              View Messages
+            <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+              </svg>
+              Messages
             </button>
           </div>
         </div>

@@ -5,67 +5,103 @@ const sendNotificationController = async (req, res) => {
   const { userId, title, body } = req.body;
 
   try {
-    await sendNotification(userId, title, body);
-    res.status(200).json({ message: "Notification sent successfully" });
+    // Allow admins to send to any user, or users to send to themselves
+    if (req.user.uid !== userId && req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        success: false,
+        message: "Unauthorized to send notifications to this user" 
+      });
+    }
+
+    const result = await sendNotification(userId, title, body);
+
+    if (result.success) {
+      res.status(200).json({ 
+        success: true,
+        message: "Notification sent successfully",
+        notification: result.notification 
+      });
+    } else {
+      res.status(400).json({ 
+        success: false,
+        message: result.message 
+      });
+    }
   } catch (error) {
-    console.error("Error sending notification:", error);
-    res.status(500).json({ message: "Error sending notification", error: error.message });
+    console.error("Controller error sending notification:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Internal server error", 
+      error: error.message 
+    });
   }
 };
 
 const getUserNotifications = async (req, res) => {
   try {
-    const userId = req.user.firebaseUID;
-    const notifications = await Notification.find({ userId }).sort({ createdAt: -1 });
+    const userId = req.user.uid;
+    
+    const notifications = await Notification.find({ userId })
+      .sort({ createdAt: -1 })
+      .lean();
 
-    res.status(200).json({ notifications });
+    res.status(200).json({ 
+      success: true,
+      notifications: notifications.map(notif => ({
+        ...notif,
+        _id: notif._id.toString(),
+        messageId: notif.messageId,
+        timestamp: notif.createdAt ? new Date(notif.createdAt).getTime() : Date.now()
+      }))
+    });
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    res.status(500).json({ message: "Error fetching notifications", error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: "Internal server error" 
+    });
   }
 };
 
 const markNotificationAsRead = async (req, res) => {
-  console.log("📩 Received Request:", req.method, req.url);
-  console.log("🆔 Request Params:", req.params);
-
   try {
-    let { id } = req.params;
+    const { id } = req.params;
+    const userId = req.user.uid;
 
-    if (!id) {
-      return res.status(400).json({ message: "Invalid notification ID format" });
-    }
-
-    // 🔥 Decode messageId to match stored format
-    const decodedMessageId = decodeURIComponent(id);
-    console.log("🔓 Decoded messageId:", decodedMessageId); // Debugging
-
-    // 🔥 Extract only the unique message ID part from the Firebase messageId format
-    const extractedMessageId = decodedMessageId.split("/").pop();
-    console.log("🆔 Extracted messageId:", extractedMessageId); // Debugging
-
-    // 🔥 Query the database for the correct messageId format
-    const notification = await Notification.findOne({
-      messageId: { $regex: extractedMessageId, $options: "i" }, // Case-insensitive match
-    });
+    const notification = await Notification.findOneAndUpdate(
+      { 
+        $or: [
+          { _id: id, userId },
+          { messageId: id, userId }
+        ]
+      },
+      { read: true },
+      { new: true }
+    );
 
     if (!notification) {
-      console.log("❌ Notification not found in database. messageId:", extractedMessageId);
-      return res.status(404).json({ message: "Notification not found" });
+      return res.status(404).json({ 
+        success: false,
+        message: "Notification not found or unauthorized" 
+      });
     }
 
-    // Mark notification as read
-    notification.read = true;
-    await notification.save();
-
-    console.log("✅ Notification marked as read:", notification);
-    res.status(200).json({ message: "Notification marked as read", notification });
+    res.status(200).json({ 
+      success: true,
+      message: "Notification marked as read",
+      notification 
+    });
   } catch (error) {
-    console.error("❌ Error marking notification as read:", error);
-    res.status(500).json({ message: "Error marking notification as read", error: error.message });
+    console.error("Error marking notification as read:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Internal server error" 
+    });
   }
 };
 
-
-
-module.exports = { sendNotification: sendNotificationController, getUserNotifications, markNotificationAsRead };
+module.exports = { 
+  sendNotification: sendNotificationController, 
+  getUserNotifications, 
+  markNotificationAsRead 
+};

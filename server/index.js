@@ -22,29 +22,18 @@ mongoose
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// CORS Setup
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://skill-swap-platform-gp36u3nvj-jaideepsai.vercel.app'
-];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      console.error(`CORS Error: Origin ${origin} is not allowed`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: 'GET,POST,PUT,PATCH,DELETE', 
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-};
 
-// Middleware
-app.use(cors(corsOptions));
+// Body parser
 app.use(express.json());
+
+app.use(cors(
+  {
+    methods:["GET", "POST", "PATCH", "PUT", "DELETE"],
+    origin:["http://localhost:5173"],
+    credentials:true,
+  }
+))
 
 // Routes
 app.use('/api', authenticate, userRoutes);
@@ -59,7 +48,7 @@ app.get('/', (req, res) => {
   res.send('Skill Swap Platform Backend is Running!');
 });
 
-// MongoDB Test Route (for debugging)
+// MongoDB Test Route
 app.get('/test-mongo', async (req, res) => {
   try {
     const collections = await mongoose.connection.db.listCollections().toArray();
@@ -73,25 +62,25 @@ app.get('/test-mongo', async (req, res) => {
   }
 });
 
-// Protected Test Route (for debugging)
+// Protected Test Route
 app.get('/protected', authenticate, (req, res) => {
   res.json({ message: 'This is a protected route', user: req.user });
 });
 
-// Handle 404 errors
+// 404 Handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Error Handler Middleware
+// Error Handler
 app.use(errorHandler);
 
-// Start Server
+// Server startup
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Global Error Handlers
+// Global error handlers
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
 });

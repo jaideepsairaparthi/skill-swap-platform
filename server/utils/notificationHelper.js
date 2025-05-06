@@ -4,46 +4,90 @@ const Notification = require("../models/Notification");
 
 const sendNotification = async (userId, title, body) => {
   try {
+    console.log(`📤 Attempting to send notification to user ${userId}`);
+    
     const user = await User.findOne({ firebaseUID: userId });
-
-    if (!user || !user.deviceTokens || user.deviceTokens.length === 0) {
-      console.log("User not found or no device tokens available");
-      return { success: false, message: "User not found or no device tokens available" };
+    if (!user) {
+      console.log("⚠️ User not found");
+      return { 
+        success: false, 
+        message: "User not found" 
+      };
     }
 
+    if (!user.deviceTokens || user.deviceTokens.length === 0) {
+      console.log("⚠️ No device tokens available for user");
+      return { 
+        success: false, 
+        message: "No device tokens available" 
+      };
+    }
+
+    console.log(`📱 Found ${user.deviceTokens.length} device tokens for user`);
+
     const message = {
-      notification: { title, body },
       tokens: user.deviceTokens,
+      notification: { title, body },
+      data: {
+        userId,
+        notificationType: "skillRequest",
+        click_action: "FLUTTER_NOTIFICATION_CLICK"
+      }
     };
 
     const response = await admin.messaging().sendEachForMulticast(message);
-    console.log("✅ Notification sent successfully:", response);
+    console.log("🔥 FCM response:", JSON.stringify(response, null, 2));
 
-    if (response.responses.some((resp) => resp.success && resp.messageId)) {
-      const messageId = `projects/skillswap-3f118/messages/${response.responses.find((resp) => resp.success).messageId}`;
+    let anySuccess = false;
+    const savedNotifications = [];
 
-      const existingNotification = await Notification.findOne({ messageId });
+    for (const [index, resp] of response.responses.entries()) {
+      if (resp.success && resp.messageId) {
+        anySuccess = true;
+        const messageId = `projects/skillswap-3f118/messages/${resp.messageId}`;
 
-      if (!existingNotification) {
-        const notification = new Notification({
-          messageId,
-          userId,
-          title,
-          body,
-          read: false,
-        });
+        // Check for existing notification
+        const existingNotification = await Notification.findOne({ messageId });
+        if (!existingNotification) {
+          const notification = new Notification({
+            messageId,
+            userId,
+            title,
+            body,
+            read: false
+          });
 
-        await notification.save();
-        console.log("✅ Notification saved to database:", notification);
-      } else {
-        console.log("⚠️ Notification already exists, skipping save.");
+          await notification.save();
+          savedNotifications.push(notification);
+          console.log(`✅ Notification saved for device ${index}:`, notification._id);
+        } else {
+          console.log(`⚠️ Notification already exists:`, existingNotification._id);
+          savedNotifications.push(existingNotification);
+        }
+      } else if (resp.error) {
+        console.error(`❌ Error sending to token ${index}:`, resp.error.message);
       }
     }
 
-    return { success: true, message: "Notification sent successfully" };
+    if (!anySuccess) {
+      return { 
+        success: false, 
+        message: "Failed to send notification to all devices" 
+      };
+    }
+
+    return { 
+      success: true,
+      message: "Notification sent successfully",
+      notifications: savedNotifications
+    };
   } catch (error) {
-    console.error("❌ Error sending notification:", error);
-    return { success: false, message: "Error sending notification", error: error.message };
+    console.error("❌ Error in sendNotification:", error);
+    return { 
+      success: false, 
+      message: "Error sending notification",
+      error: error.message 
+    };
   }
 };
 

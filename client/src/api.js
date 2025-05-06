@@ -16,12 +16,10 @@ const getFirebaseToken = async () => {
 const fetchWithAuth = async (url, options = {}) => {
   const token = await getFirebaseToken();
   if (!token) {
-    console.error('User not authenticated');
     return { error: 'Unauthorized' };
   }
 
   try {
-    console.log('Making request to:', url, 'with options:', options); // Debugging
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -32,19 +30,17 @@ const fetchWithAuth = async (url, options = {}) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error(`Error ${response.status}:`, errorData);
-      return { error: errorData.message || `HTTP Error: ${response.status}` };
+      const errorData = await response.json().catch(() => ({}));
+      return { 
+        error: errorData.message || `Request failed with status ${response.status}`,
+        status: response.status
+      };
     }
 
-    // Handle empty responses (e.g., 204 No Content)
-    if (response.status === 204) {
-      return { data: null };
-    }
-
-    return { data: await response.json() };
+    return response.status === 204 
+      ? { data: null }
+      : { data: await response.json() };
   } catch (error) {
-    console.error('Network error:', error);
     return { error: 'Network error' };
   }
 };
@@ -107,25 +103,21 @@ export const createOrUpdateUser = async (userData) => {
   return data; // Return the updated user object
 };
 
-// Request Skill Swap
-export const requestSkillSwap = async (targetUserId, skillName) => {
-  if (!targetUserId || !skillName) {
-    console.error('Target user ID and skill name are required');
-    return null;
-  }
 
-  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/skill-swap/request`, {
+export const requestSkillSwap = async (targetUserId, skillName) => {
+  const { data, error, status } = await fetchWithAuth(`${API_BASE_URL}/skill-swap/request`, {
     method: 'POST',
-    body: JSON.stringify({ targetUserId, skillName }),
+    body: JSON.stringify({ targetUserId, skillName })
   });
 
   if (error) {
-    console.error('Error requesting skill swap:', error);
-    return null;
+    return { 
+      error,
+      isDuplicate: status === 400 
+    };
   }
 
-  console.log('Skill swap request successful:', data);
-  return data;
+  return { data };
 };
 
 // Update Device Token
@@ -161,6 +153,41 @@ export const addReview = async (reviewData) => {
   return data;
 };
 
+export const startVideoCall = async (matchId) => {
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      console.error("No authenticated user found");
+      return { error: "User not authenticated" };
+    }
+
+    const token = await user.getIdToken();
+    
+    const response = await fetch(`${API_BASE_URL}/matches/${matchId}/start-call`, {
+      method: "POST",
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to start video call');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error starting video call:", error);
+    throw error;
+  }
+};
+
+
+
 export const fetchMatches = async (userId) => {
   const { data, error } = await fetchWithAuth(`${API_BASE_URL}/matches/${userId}`);
   if (error) {
@@ -170,79 +197,105 @@ export const fetchMatches = async (userId) => {
   return data;
 };
 
-    export const updateMatchStatus = async (matchId, status) => {
-      const { data, error } = await fetchWithAuth(`${API_BASE_URL}/matches/${matchId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status }),
-      });
-      if (error) {
-        console.error('Error updating match status:', error);
-        return null;
-      }
-      return data;
-    };
-
-    // Fetch Notifications
-export const fetchNotifications = async () => {
-  const { data, error } = await fetchWithAuth(`${API_BASE_URL}/notifications`);
-  if (error) {
-    console.error('Error fetching notifications:', error);
-    return [];
-  }
-  return data.notifications;
-};
-
-
-
-// Mark Notification as Read
-export const markNotificationAsRead = async (messageId) => {
-  if (!messageId) {
-    console.error("❌ Error: messageId is missing");
-    return { error: "messageId is required" };
-  }
-
-  console.log("📩 Marking notification as read. Sent messageId:", messageId);
-
-  // 🔥 Encode messageId only once to prevent double encoding
-  const encodedId = encodeURIComponent(decodeURIComponent(messageId));
-
-  // Get authentication token
-  const auth = getAuth();
-  const user = auth.currentUser;
-
-  if (!user) {
-    console.error("❌ No authenticated user found");
-    return { error: "User not authenticated" };
-  }
-
+export const updateMatchStatus = async (matchId, status) => {
   try {
-    const token = await user.getIdToken();
-    if (!token) {
-      console.error("❌ No authentication token found");
-      return { error: "Unauthorized" };
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      console.error("No authenticated user found");
+      return { error: "User not authenticated" };
     }
 
-    console.log("🔑 Authentication Token Retrieved:", token);
-
-    const response = await fetch(`${API_BASE_URL}/notifications/${encodedId}/read`, {
+    const token = await user.getIdToken();
+    
+    const response = await fetch(`${API_BASE_URL}/matches/${matchId}/status`, {
       method: "PATCH",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       },
+      body: JSON.stringify({ status }),
+      credentials: 'include'
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("❌ Error marking notification as read:", errorData);
       return { error: errorData.message || `HTTP Error: ${response.status}` };
     }
 
-    const result = await response.json();
-    console.log("✅ Notification marked as read successfully:", result);
-    return { data: result };
+    return await response.json();
   } catch (error) {
-    console.error("❌ Network error while marking notification as read:", error);
+    console.error("Network error while updating match status:", error);
     return { error: "Network error" };
   }
 };
+
+    // Fetch Notifications
+    export const fetchNotifications = async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        
+        if (!user) {
+          console.log("No user logged in");
+          return [];
+        }
+    
+        const token = await user.getIdToken();
+        const response = await fetch(`${API_BASE_URL}/notifications`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+    
+        const data = await response.json();
+        console.log('Notifications API response:', data);
+        return data.notifications || [];
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        toast.error("Failed to load notifications");
+        return [];
+      }
+    };
+    
+    export const markNotificationAsRead = async (messageId) => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        
+        if (!user) {
+          console.error("No authenticated user found");
+          return { error: "User not authenticated" };
+        }
+    
+        const token = await user.getIdToken();
+        const encodedId = encodeURIComponent(messageId);
+        
+        const response = await fetch(`${API_BASE_URL}/notifications/${encodedId}/read`, {
+          method: "PATCH",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+    
+        if (!response.ok) {
+          const errorData = await response.json();
+          return { error: errorData.message || `HTTP Error: ${response.status}` };
+        }
+    
+        return await response.json();
+      } catch (error) {
+        console.error("Network error while marking notification as read:", error);
+        return { error: "Network error" };
+      }
+    };
+
